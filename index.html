@@ -714,7 +714,7 @@
   <div class="title-header">
     <h1 class="app-title">わりざんの<span class="accent">ひっ算</span>れんしゅう<span class="badge2">Ⅱ</span></h1>
     <p class="app-subtitle">〜 2けた・3けたで わる ・ ゆびかくしで けんとうを つける 〜</p>
-    <div class="version-badge"><span class="dot"></span>バージョン <span class="vnum" id="titleVersion">2.5.0</span></div>
+    <div class="version-badge"><span class="dot"></span>バージョン <span class="vnum" id="titleVersion">2.6.0</span></div>
   </div>
 
   <div>
@@ -746,7 +746,7 @@
       <div class="pill">もんだい <span class="num" id="qNumDisplay">1</span> / <span id="qTotalDisplay">5</span></div>
     </div>
     <div class="right">
-      <div class="pill version-pill">ver <span class="vnum" id="mainVersion">2.5.0</span></div>
+      <div class="pill version-pill">ver <span class="vnum" id="mainVersion">2.6.0</span></div>
       <div class="pill">⭕ <span class="num" id="correctDisplay">0</span></div>
     </div>
   </div>
@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.6.0';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -1309,7 +1309,9 @@ function setupMaskingForTateru(step) {
   }
 
   // 十の位を強調(青)
-  highlightTens(step);
+  // v2.6.0: 「たてる」では けんとうに使う数ぜんぶ を緑でフラッシュさせるため、
+  //         色がぶつかる青の十の位強調は「へらす」のときだけ出す。
+  if (step.kind === 'herasu') highlightTens(step);
 }
 
 function highlightTens(step) {
@@ -1495,6 +1497,19 @@ function showHintForStep(step) {
       .forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hint-source'); });
   }
 
+  // 「たてる」の緑ハイライト(v2.6.0)。
+  // 商のけんとうに使う数 = わられる数がわの「いま見ている数」+ わる数ぜんぶ。
+  //   86 ÷ 43 の × のくらい   → 「8」と「43」が光る
+  //   86 ÷ 43 の たてる        → 「86」と「43」が光る
+  //   154 ÷ 15 の2段目のたてる → あまり行の「4?」と「15」が光る
+  // これも“ヒント”ではなく手順の中核なので、モードや問題番号のゲートに関わらず常に出す。
+  // 「へらす」では出さない(青の十の位強調と 指隠しの導線をそのまま残すため)。
+  if (step.kind === 'tateru') {
+    getEstimateSourceCellIds(step)
+      .forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hint-source'); });
+    document.querySelectorAll('.divisor-cell').forEach(el => el.classList.add('hint-source'));
+  }
+
   if (state.mode === 'random') return;
   const qNum = state.qIdx + 1;
   const autoShow = (qNum <= 3);
@@ -1509,6 +1524,20 @@ function showHintForStep(step) {
     if (qEl) qEl.classList.add('hint-source');
     document.querySelectorAll('.divisor-cell').forEach(el => el.classList.add('hint-source'));
   }
+}
+
+/* たてる で緑にする「わられる数がわ」のセル。
+   × のくらい(skip): わられる数の左端から そのくらいまで(例 153÷24 の2つめの × なら d-0,d-1 = 「15」)
+   ふつうのたてる    : いま見ている partial。1段目は わられる数の該当けた、
+                       2段目以降は 前段のあまり行(おろした数をふくむ)。
+   後者は「ひく」でひかれる数と同じ範囲なので getMinuendCellIds をそのまま使う。 */
+function getEstimateSourceCellIds(step) {
+  if (step.skip) {
+    const ids = [];
+    for (let i = 0; i <= step.position; i++) ids.push(`d-${i}`);
+    return ids;
+  }
+  return getMinuendCellIds(step.stageIdx);
 }
 
 /* ひく で緑にする「ひかれる数(上の行)」の全セル。
