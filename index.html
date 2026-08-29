@@ -240,7 +240,7 @@
   }
   .mult-hissan.newpop { animation: multPop 0.4s cubic-bezier(0.34,1.4,0.64,1); }
   .mult-hissan.rejected { opacity: 0.6; }
-  .mult-hissan.accepted { background: #edf5ee; box-shadow: inset 0 0 0 2px rgba(90,159,107,0.35); }
+  /* v2.8.3: 正解時の緑背景は「せいかい!」表示と重なって煩雑だったため削除 */
 
   .mult-cell {
     position: absolute;
@@ -301,7 +301,6 @@
     white-space: nowrap;
   }
   .mult-hissan.rejected .mult-note { color: var(--accent-2); }
-  .mult-hissan.accepted .mult-note { color: var(--green); }
   .mult-cell.answer-blank {
     box-shadow: inset 0 0 0 2px rgba(138,111,176,0.4);
     border-radius: 6px; background: rgba(138,111,176,0.07);
@@ -411,6 +410,39 @@
     0% { transform: translateY(6px) scale(0.5); opacity: 0; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
+
+  /* v2.7.0: ひく でくり下がりが必要な位に重ねる小バッジ。
+     もとのマス(hint-sourceの緑パルスなど)には手を加えず、独立した重ね表示にする。 */
+  .borrow-mark {
+    position: absolute; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-hand); font-weight: 700;
+    line-height: 1; border-radius: 50%;
+    color: white; pointer-events: none;
+    box-shadow: 0 2px 4px rgba(44,58,74,0.3);
+    animation: borrowMarkPop 0.35s cubic-bezier(0.34,1.5,0.6,1);
+  }
+  .borrow-mark.borrow-lend    { background: var(--purple); }
+  .borrow-mark.borrow-receive { background: var(--purple); opacity: 0.88; }
+  @keyframes borrowMarkPop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* v2.8.1: 「かりる」ボタン(ひくの中で、くり下がりが必要な位のときだけ、筆算の右側に出す) */
+  .borrow-btn {
+    display: none; position: absolute; z-index: 6;
+    background: white; border: 3px solid var(--purple); border-radius: 999px;
+    box-shadow: 0 4px 0 var(--purple);
+    align-items: center; justify-content: center; gap: 0.5em;
+    padding: 0.55em 1.1em; font-family: var(--font-display);
+    color: var(--purple); font-weight: 900; font-size: 16px;
+    white-space: nowrap; transition: all 0.1s; cursor: pointer;
+    animation: pulse 1.5s infinite;
+  }
+  .borrow-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--purple); }
+  .borrow-btn .borrow-icon { font-size: 18px; }
+  .borrow-btn.show { display: flex; }
 
   .divisor-cell {
     position: absolute; width: var(--cell); height: var(--cell);
@@ -594,52 +626,6 @@
   .skip-btn:hover { opacity: 0.95; }
   .skip-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); opacity: 1; }
 
-  /* ============ MODAL ============ */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(44,58,74,0.6);
-    display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px);
-  }
-  .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
-  .modal {
-    background: var(--paper); border-radius: 2cqw; padding: 3cqh 3cqw;
-    max-width: 92cqw; max-height: 92cqh; box-shadow: 0 20px 60px var(--shadow-deep);
-    position: relative; animation: pop 0.3s;
-  }
-  .modal-close {
-    position: absolute; top: -1cqh; right: -1cqh; width: 5cqh; height: 5cqh;
-    background: var(--accent-2); color: white; border-radius: 50%;
-    font-size: 22px; font-weight: 900; box-shadow: 0 4px 12px var(--shadow);
-  }
-  .modal-title {
-    font-family: var(--font-display); font-weight: 900;
-    font-size: 26px; text-align: center; color: var(--ink); margin-bottom: 2cqh;
-  }
-  .modal-title .deco { color: var(--accent); }
-  .modal-hint-note {
-    margin-top: 2cqh; text-align: center; font-family: var(--font-hand);
-    font-size: 16px; color: var(--ink-soft);
-    background: var(--paper-2); padding: 1cqh 2cqw; border-radius: 999px; border: 1px dashed var(--line);
-  }
-  .kuku-table { display: grid; grid-template-columns: auto repeat(9, 1fr); gap: 2px; background: var(--ink); border-radius: 1cqw; overflow: hidden; padding: 2px; }
-  .kuku-cell { background: white; padding: 0.6cqh 0.4cqw; text-align: center; font-family: var(--font-hand); font-size: 18px; color: var(--ink); font-weight: 600; }
-  .kuku-header { background: var(--accent); color: white; font-family: var(--font-display); font-weight: 900; }
-  .kuku-row-header { background: var(--blue); color: white; font-family: var(--font-display); font-weight: 900; }
-
-  /* ヒントボタン */
-  .hint-btn-container {
-    position: absolute; top: 1.5cqh; right: calc(1.5cqh + 136px); z-index: 6;
-    display: flex; flex-direction: column; align-items: center; gap: 0.3cqh;
-    background: white; border: 3px solid var(--yellow); border-radius: 1.2cqw; padding: 1cqh 1.2cqw;
-    box-shadow: 0 4px 0 var(--yellow), 0 6px 16px rgba(245,200,66,0.25);
-    cursor: pointer; font-family: var(--font-display); transition: all 0.15s;
-    animation: hintIdleGlow 2.5s ease-in-out infinite;
-  }
-  .hint-btn-container:hover { transform: translateY(-2px); }
-  .hint-btn-container:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--yellow); }
-  .hint-btn-icon { font-size: 26px; line-height: 1.25; }
-  .hint-btn-label { font-size: 15px; font-weight: 700; color: #b8860b; letter-spacing: 0.06em; }
-  @keyframes hintIdleGlow { 0%,100% { box-shadow: 0 4px 0 var(--yellow), 0 6px 16px rgba(245,200,66,0.25); } 50% { box-shadow: 0 4px 0 var(--yellow), 0 6px 24px rgba(245,200,66,0.55); } }
-
   /* ============ RESULT SCREEN ============ */
   #resultScreen { flex-direction: column; align-items: center; justify-content: center; padding: 4cqh 4cqw; gap: 3cqh; }
   .result-card {
@@ -758,13 +744,12 @@
       </div>
       <!-- 右側かけ算ワークスペース -->
       <div class="mult-workspace" id="multWorkspace"></div>
+      <!-- v2.8.1: くり下がりの「かりる」ボタン(筆算の右側、必要なときだけ表示) -->
+      <button class="borrow-btn" id="borrowBtn">
+        <span class="borrow-icon">↩️</span><span>10 かりる</span>
+      </button>
       <!-- スキップ -->
       <button class="skip-btn" id="skipBtn" title="この もんだいを スキップ">スキップ →</button>
-      <!-- ヒント -->
-      <button class="hint-btn-container" id="hintBtn" title="タップ:けいさんヒント / 長押し:くくひょう">
-        <span class="hint-btn-icon">💡</span>
-        <span class="hint-btn-label">ヒント</span>
-      </button>
       <!-- 赤丸 -->
       <div class="big-maru" id="bigMaru" style="display:none;">
         <div class="maru-svg-wrap">
@@ -848,16 +833,6 @@
   </div>
 </div>
 
-<!-- ============ HINT MODAL ============ -->
-<div class="modal-overlay" id="hintModal">
-  <div class="modal">
-    <button class="modal-close" id="hintCloseBtn">×</button>
-    <div class="modal-title"><span class="deco">★</span> くくひょう <span class="deco">★</span></div>
-    <div class="kuku-table" id="kukuTable"></div>
-    <div class="modal-hint-note">💡 タップ:けいさんヒント　長押し:くくひょう</div>
-  </div>
-</div>
-
 <script>
 /* ---------- 10.1インチ基準ステージのスケーリング ---------- */
 const DESIGN_W = 1280, DESIGN_H = 800;
@@ -883,7 +858,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.6.0';
+const APP_VERSION = '2.10.0';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -929,9 +904,27 @@ const LEVELS = {
   },
   2: {
     title: 'レベル 2', desc: '2けた÷2けた\nかりの商を へらす',
-    fixed: [[86,23],[81,12],[57,14],[95,13],[63,32],[61,22],[48,13],[54,14],[93,12],[87,25]],
-    randomGen: () => genByCond(a => a.dvLen===2 && a.ddLen===2 && a.divisor>=20 &&
-                                    a.maxCorr>=1 && a.qDigits===1)
+    /* 3問目(index2)は修正2回、5問目(index4)は修正3回になるよう固定 */
+    /* 1問目・2問目は修正1回、3問目は修正2回、5問目は修正3回になるよう固定 */
+    fixed: [[86,23],[81,21],[80,27],[95,13],[90,13],[61,22],[48,13],[54,14],[93,12],[87,25]],
+    /* idx: buildQuestionSet 内での問題番号(0始まり)。
+       1問目(idx===0)・2問目(idx===1) → 修正ちょうど1回(わる数20以上)
+       3問目(idx===2)                 → 修正ちょうど2回(わる数20以上)
+       5問目(idx===4)                 → 修正ちょうど3回(わる数11〜19まで許可。レベル5と範囲が一部重なる)
+       それ以外(4問目)                → 従来どおり 修正1回以上 */
+    randomGen: (idx) => {
+      if (idx === 0 || idx === 1) {
+        return gen2x2ByCorr(20, 99, 1);   // わる数20以上・修正ちょうど1回
+      }
+      if (idx === 2) {
+        return gen2x2ByCorr(20, 99, 2);   // わる数20以上・修正ちょうど2回
+      }
+      if (idx === 4) {
+        return gen2x2ByCorr(11, 99, 3);   // 修正ちょうど3回(わる数11〜19まで許可)
+      }
+      return genByCond(a => a.dvLen===2 && a.ddLen===2 && a.divisor>=20 &&
+                              a.maxCorr>=1 && a.qDigits===1);
+    }
   },
   3: {
     title: 'レベル 3', desc: '3けた÷2けた\nしょうが 1けた',
@@ -1053,6 +1046,36 @@ function genByCond(cond) {
   }
   return [96, 32]; // フォールバック
 }
+
+/* 2けた÷2けた専用のせまい範囲での生成。
+   genByCond は3けたも含む広い範囲から探すため、"修正ちょうどN回"のような
+   出現率の低い条件だと40000回のガードに引っかかりフォールバック([96,32]=修正0回)
+   を返してしまうことがある(レベル2の各問目の出題ルールが崩れる原因になる)。
+   2けた÷2けただけに絞って探すことで、必ず条件に合う組を高確率で見つけられるようにする。 */
+function gen2x2ByCorr(divisorMin, divisorMax, corrTarget) {
+  let guard = 0;
+  while (guard < 40000) {
+    guard++;
+    const divisor  = rand(divisorMin, divisorMax);
+    const dividend = rand(10, 99);
+    if (dividend < divisor) continue;
+    const a = analyzeForGen(dividend, divisor);
+    if (!a) continue;
+    if (a.dvLen === 2 && a.ddLen === 2 && a.qDigits === 1 && a.maxCorr === corrTarget) {
+      return [dividend, divisor];
+    }
+  }
+  // 万一見つからない場合の最終手段として総当たりで探す(理論上ここには来ない)
+  for (let divisor = divisorMin; divisor <= divisorMax; divisor++) {
+    for (let dividend = divisor; dividend <= 99; dividend++) {
+      const a = analyzeForGen(dividend, divisor);
+      if (a && a.dvLen === 2 && a.ddLen === 2 && a.qDigits === 1 && a.maxCorr === corrTarget) {
+        return [dividend, divisor];
+      }
+    }
+  }
+  return [96, 32]; // それでも見つからない場合のフォールバック
+}
 function analyzeForGen(dividend, divisor) {
   const plan = buildPlan(dividend, divisor);
   let maxCorr = 0, anyZeroQ = false;
@@ -1136,14 +1159,15 @@ function renderDivision() {
   const div = document.getElementById('division');
   div.innerHTML = '';
 
-  const DIVISOR_START_COL = 0;      // わる数は2桁なので col 0..? 実際は右詰めで配置
-  const FIRST_DIGIT_COL = 2;        // わる数(2桁) の右、ブラケットの右隣
+  const dvStr = String(divisor);
+  const dvLen = dvStr.length;       // 2 または 3
+
+  const DIVISOR_START_COL = 0;      // わる数は col0 から左詰め
+  // v2.8.4: わられる数の先頭カラムは「わる数のけた数」。
+  //         2 固定だと 3けたのわる数(レベル7)で わる数の一の位と わられる数が同じマスに重なる。
+  const FIRST_DIGIT_COL = dvLen;
   const QUOTIENT_ROW = 0;
   const DIVIDEND_ROW = 1;
-
-  // わる数は2桁 → col0,col1 に配置。ブラケットは col2 の左端。わられる数は col2 から
-  const dvStr = String(divisor);
-  const dvLen = dvStr.length; // 2
 
   const totalCols = dvLen + n + 1;
   const totalRows = 2 + stages.length * 2;
@@ -1159,7 +1183,9 @@ function renderDivision() {
   // この問題で1つの位で最大何回へらすか(=trials.length-1 の最大)
   let maxHerasu = 0;
   stages.forEach(s => { if (s.trials) maxHerasu = Math.max(maxHerasu, s.trials.length - 1); });
-  // かけ算メモのタイトル1行(約1.0マス) + へらしの積み上げ(0.82マス×回数) + 余白
+  // わり算の筆算じたいの上端: 「商の上に積む数」ぶんのヘッドルームだけ確保する
+  // (v2.10.0: ヒントボタン廃止により、かけ算メモの領域はこれとは独立に
+  //  画面のいちばん上からいちばん下まで使えるようにした → 下の positionMultWorkspace 呼び出し参照)
   const topMargin = cell * (1.0 + maxHerasu * 0.82 + 0.3);
   let rawTop = topMargin;
   if (rawTop + divHeight > ph) rawTop = Math.max(cell * 0.4, ph - divHeight);
@@ -1239,6 +1265,13 @@ function renderDivision() {
       placeEmpty(FIRST_DIGIT_COL + i, productRow, `p-${stage.position}-${i}`);
       placeEmpty(FIRST_DIGIT_COL + i, remainderRow, `r-${stage.position}-${i}`);
     }
+    // v2.8.4: たてすぎ(ひけない)の積は、ひかれる数より1けた多くなることがある。
+    // 例) 92 ÷ 28 で 4をたてると 28×4=112 → 3けた。
+    // そのぶん、わられる数の左どなり(=わる数の一の位の下)に はみ出しマスを用意する。
+    const ovMax = productOverflowCols(stage);
+    for (let k = 1; k <= ovMax; k++) {
+      placeEmpty(FIRST_DIGIT_COL - k, productRow, prodCellId(stage.position, -k));
+    }
     const subLine = document.createElement('div');
     subLine.className = 'sub-line';
     subLine.id = `subline-${stage.position}`;
@@ -1250,7 +1283,11 @@ function renderDivision() {
   });
 
   // かけ算ワークスペースの位置を設定
-  positionMultWorkspace(snapLeft + divWidth, snapTop, cell);
+  // かけ算メモの上端は、わり算じしんの位置(snapTop)には合わせず、
+  // 画面のいちばん上ぎりぎり(旧ヒントボタンのあった余白)から始める。
+  // これで「上から下まで」目いっぱいの高さを、修正回数の多い問題のために使える。
+  const wsTop = Math.max(0, Math.round(Math.max(cell * 0.3, ph * 0.02) / cell) * cell);
+  positionMultWorkspace(snapLeft + divWidth, wsTop, cell);
 }
 
 /* かけ算ワークスペースを筆算の右側の予約領域に配置(背景グリッドに整列) */
@@ -1446,6 +1483,9 @@ function clearSpotlight() {
 function clearHints() {
   document.querySelectorAll('.hint-source').forEach(c => c.classList.remove('hint-source'));
   document.querySelectorAll('.op-hint').forEach(el => el.remove());
+  document.querySelectorAll('.borrow-mark').forEach(el => el.remove());  // v2.7.0
+  const borrowBtn = document.getElementById('borrowBtn');
+  if (borrowBtn) borrowBtn.classList.remove('show');  // v2.8.0
 }
 
 function spotlightForStep(step) {
@@ -1469,7 +1509,9 @@ function spotlightForStep(step) {
     if (step.canSub) {
       const remLen = String(stage.remainder).length || 1;
       const startCol = stage.partialEnd - remLen + 1;
-      for (let i = Math.max(stage.partialStart, startCol); i <= stage.partialEnd; i++) {
+      // v2.9.0: あまりが partialStart より左の桁にまではみ出すことがある(例: 109÷11 の一の位の段)。
+      // 入力マス(getInputCellIds)と同じ範囲を対象にしないと、十の位が黄色にならないバグになる。
+      for (let i = startCol; i <= stage.partialEnd; i++) {
         const cc = document.getElementById(`r-${step.position}-${i}`);
         if (cc) cc.classList.add('spot');
       }
@@ -1495,6 +1537,7 @@ function showHintForStep(step) {
   if (step.kind === 'hiku' && step.canSub) {
     [...getMinuendCellIds(step.stageIdx), ...getProductCellIds(step)]
       .forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hint-source'); });
+    renderResolvedBorrowMarks(step);  // v2.8.0: 「かりる」で確定ずみの位だけ再描画(リサイズ対応)
   }
 
   // 「たてる」の緑ハイライト(v2.6.0)。
@@ -1563,14 +1606,32 @@ function getMinuendCellIds(stageIdx) {
   return ids;
 }
 
-/* ひく で緑にする「ひくかず(積の行)」の全セル p-{position}-{col} */
+/* v2.8.4: 積の行のマスid。
+   col が 0以上 → わられる数と同じけた位置(p-{position}-{col})。
+   col が 負    → たてすぎで左へはみ出したマス(p-{position}-ov{n})。
+   id に負の数を入れると id.split('-').pop() での列番号取り出しが壊れるため、別名にしている。 */
+function prodCellId(position, col) {
+  return col < 0 ? `p-${position}-ov${-col}` : `p-${position}-${col}`;
+}
+
+/* v2.8.4: その段で積が左へ何マスはみ出しうるか(たてすぎの試行を含めた最大) */
+function productOverflowCols(stage) {
+  let ov = 0;
+  (stage.trials || []).forEach(t => {
+    const len = String(t.product).length;
+    ov = Math.max(ov, len - stage.partialEnd - 1);
+  });
+  return Math.max(0, ov);
+}
+
+/* ひく で緑にする「ひくかず(積の行)」の全セル */
 function getProductCellIds(step) {
   const c = state.current;
   const stage = c.plan.stages[step.stageIdx];
   const prodLen = String(step.product).length;
   const startCol = stage.partialEnd - prodLen + 1;
   const ids = [];
-  for (let col = startCol; col <= stage.partialEnd; col++) ids.push(`p-${step.position}-${col}`);
+  for (let col = startCol; col <= stage.partialEnd; col++) ids.push(prodCellId(step.position, col));
   return ids;
 }
 
@@ -1590,6 +1651,183 @@ function getPartialCellIds(stageIdx) {
     }
   }
   return ids;
+}
+
+/* v2.7.0: 「ひく」でくり下がりが必要な位を検出する。
+   ひかれる数(getMinuendCellIds)とひくかず(getProductCellIds)を、
+   実際のマスidに含まれるcol番号(=わられる数の中でのけた位置。0が最上位)で突き合わせ、
+   一の位(いちばん右=col番号が最大)から左へシミュレーションする。
+   戻り値: [{ col, fromCol }, ...] col=くり下げてもらう位, fromCol=貸す隣(ひとつ左)の位 */
+function computeBorrowColumns(step) {
+  if (!step.canSub) return [];
+  const colOf = id => parseInt(id.split('-').pop(), 10);
+
+  const minuendByCol = {};
+  getMinuendCellIds(step.stageIdx).forEach(id => {
+    const el = document.getElementById(id);
+    minuendByCol[colOf(id)] = parseInt(el && el.textContent, 10) || 0;
+  });
+  const productByCol = {};
+  getProductCellIds(step).forEach(id => {
+    const el = document.getElementById(id);
+    productByCol[colOf(id)] = parseInt(el && el.textContent, 10) || 0;
+  });
+
+  const cols = Object.keys(minuendByCol).map(Number).sort((a, b) => a - b);
+  let incoming = 0;   // 右どなりに1貸したことで、この位がすでに-1されているか
+  const events = [];
+  for (let i = cols.length - 1; i >= 0; i--) {
+    const col = cols[i];
+    const top = minuendByCol[col] - incoming;
+    const bottom = productByCol[col] || 0;
+    if (top < bottom) {
+      const fromCol = cols[i - 1];
+      if (fromCol !== undefined) events.push({ col, fromCol });
+      incoming = 1;
+    } else {
+      incoming = 0;
+    }
+  }
+  return events.reverse();  // 左(上のくらい)→右の順にしておく
+}
+
+/* v2.8.0: くり下がりの位に対応するマスidの一覧(col番号→id)を作る */
+function borrowCellIdByCol(step) {
+  const map = {};
+  getMinuendCellIds(step.stageIdx).forEach(id => {
+    map[parseInt(id.split('-').pop(), 10)] = id;
+  });
+  return map;
+}
+
+/* v2.8.0: 1件のくり下がりイベントぶんだけバッジを描画する。
+   貸す側(fromCol): 元の数字に斜線を引き、-1した「結果の数字」を表示(例: 6→5)。
+   借りる側(col)  : 「10」だけを表示(＋記号なし)。
+   1つの位が「貸す」と「借りる」を両方かねるとき(連続したくり下がり)は、
+   バッジが重ならないよう左上/右上に振り分ける。 */
+function renderBorrowBadge(step, event, lendCols) {
+  const cellIdByCol = borrowCellIdByCol(step);
+  const div = document.getElementById('division');
+  const cell = getCellSize();
+
+  function badge(col, text, kind, cornerRight) {
+    const cellId = cellIdByCol[col];
+    const el = cellId && document.getElementById(cellId);
+    if (!el) return;
+    const left = parseFloat(el.style.left) || 0;
+    const top  = parseFloat(el.style.top)  || 0;
+    const b = document.createElement('div');
+    b.className = 'borrow-mark ' + kind;
+    b.dataset.borrowCol = col;
+    b.style.left   = (left + (cornerRight ? cell * 0.55 : cell * 0.03)) + 'px';
+    b.style.top    = (top  + cell * 0.03) + 'px';
+    b.style.width  = (cell * 0.42) + 'px';
+    b.style.height = (cell * 0.42) + 'px';
+    b.style.fontSize = (cell * 0.24) + 'px';
+    b.textContent = text;
+    div.appendChild(b);
+  }
+
+  const fromEl = document.getElementById(cellIdByCol[event.fromCol]);
+  const fromOriginal = fromEl ? (parseInt(fromEl.textContent, 10) || 0) : 0;
+  badge(event.fromCol, String(fromOriginal - 1), 'borrow-lend', false);
+  badge(event.col, '10', 'borrow-receive', lendCols.has(event.col));
+}
+
+/* v2.8.0: 「かりる」で確定ずみのイベントだけ再描画する(リサイズ後の復元用)。
+   まだ確定していない位は表示しない(ボタンを押すまで見せないのがv2.8.0の設計)。 */
+function renderResolvedBorrowMarks(step) {
+  const c = state.current;
+  if (!c || !c.hikuBorrowEvents || !c.hikuBorrowResolved || c.hikuBorrowResolved.size === 0) return;
+  const lendCols = new Set(c.hikuBorrowEvents.map(e => e.fromCol));
+  c.hikuBorrowEvents.forEach(ev => {
+    if (c.hikuBorrowResolved.has(ev.col)) renderBorrowBadge(step, ev, lendCols);
+  });
+}
+
+/* v2.8.2: 「かりる」ボタンを、筆算(ひかれる数・積)のすぐ右どなりに配置する。
+   横位置: 筆算(division)の右端から少しあけた位置。ただしかけ算ワークスペースの
+   実際の描画位置(実測)より手前に必ず収める(重ならない側を優先)。
+   縦位置: 積の行(ひくかず)の高さ(=ひかれる数の行と、あまり行のちょうど中間)に合わせる。 */
+function positionBorrowButton(step) {
+  const btn = document.getElementById('borrowBtn');
+  const div = document.getElementById('division');
+  const panel = document.getElementById('calcPanel');
+  if (!btn || !div || !panel) return;
+
+  const cell = getCellSize();
+  const divLeft = parseFloat(div.style.left) || 0;
+  const divWidthPx = parseFloat(div.style.width) || 0;
+  const divTop = parseFloat(div.style.top) || 0;
+  const divRight = divLeft + divWidthPx;
+
+  const margin = cell * 0.35;
+  const estWidth = btn.offsetWidth || (cell * 3.2);
+
+  // かけ算ワークスペースの実際の描画上の左端(コンテナ位置。実測で十分安全に手前に収まる)
+  const ws = document.getElementById('multWorkspace');
+  const wsLeft = ws ? (parseFloat(ws.style.left) || Infinity) : Infinity;
+
+  let left = divRight + margin;                 // 理想: 筆算のすぐ右
+  const maxLeft = wsLeft - estWidth - margin;    // これを超えるとワークスペースに重なる
+  if (left > maxLeft) left = Math.max(divRight + cell * 0.1, maxLeft);
+
+  // 縦位置: 積の行(ひくかず)の高さに中央を合わせる
+  const productIds = getProductCellIds(step);
+  const refEl = productIds[0] && document.getElementById(productIds[0]);
+  const cellTop = refEl ? (parseFloat(refEl.style.top) || 0) : 0;
+  const rowCenterY = divTop + cellTop + cell / 2;
+
+  btn.style.right = 'auto';
+  btn.style.left = left + 'px';
+  const h = btn.offsetHeight || (cell * 0.9);
+  btn.style.top = (rowCenterY - h / 2) + 'px';
+}
+
+/* v2.8.0: いま入力しようとしている位のcol番号(ひく専用、一の位から順) */
+function currentHikuColumn(step) {
+  const c = state.current;
+  const cellIds = getInputCellIds(step);
+  const id = cellIds[c.inputBuffer.length];
+  return id ? parseInt(id.split('-').pop(), 10) : null;
+}
+
+/* v2.8.0: いまの位がくり下がり待ちなら numpad を止めて「かりる」ボタンを出す。
+   不要なら numpad を有効にしてボタンを隠す。hiku(canSub)の間、毎回呼び出す。 */
+function updateHikuBorrowGate(step) {
+  const c = state.current;
+  const borrowBtn = document.getElementById('borrowBtn');
+  const col = currentHikuColumn(step);
+  const pendingEvent = (col !== null && c.hikuBorrowEvents)
+    ? c.hikuBorrowEvents.find(e => e.col === col && !c.hikuBorrowResolved.has(col))
+    : null;
+  const numHint = document.getElementById('numHint');
+  if (pendingEvent) {
+    enableNumpad(false);
+    if (borrowBtn) { borrowBtn.classList.add('show'); positionBorrowButton(step); }  // v2.8.1
+    if (numHint) numHint.textContent = `${placeName(c.inputBuffer.length)}は ひけないよ。「かりる」を おそう`;
+  } else {
+    if (borrowBtn) borrowBtn.classList.remove('show');
+    enableNumpad(true);
+    if (numHint) numHint.textContent = `${placeName(c.inputBuffer.length)}の こたえは？`;
+  }
+}
+
+/* v2.8.0: 「かりる」ボタンのハンドラ。該当イベントのバッジを描画し、確定済みにして numpad を戻す。 */
+function handleBorrowClick() {
+  const c = state.current;
+  if (!c || c.completed) return;
+  const step = c.plan.steps[c.stepIdx];
+  if (!step || step.kind !== 'hiku' || !c.stepConfirmed || !c.hikuBorrowEvents) return;
+  const col = currentHikuColumn(step);
+  const event = c.hikuBorrowEvents.find(e => e.col === col && !c.hikuBorrowResolved.has(col));
+  if (!event) return;
+
+  resetIdleTimer();
+  const lendCols = new Set(c.hikuBorrowEvents.map(e => e.fromCol));
+  renderBorrowBadge(step, event, lendCols);
+  c.hikuBorrowResolved.add(col);
+  updateHikuBorrowGate(step);
 }
 
 /* ---------- STEP HINT TEXT ---------- */
@@ -1630,7 +1868,8 @@ function updateStepHint() {
     } else if (step.kind === 'kakeru') {
       numHint.textContent = multStepHintText();
     } else if (step.kind === 'hiku') {
-      if (step.canSub) numHint.textContent = `${stage.partial} - ${step.product} は…?`;
+      // v2.7.0: 一の位から順に入力させるので、最初にその順番を案内する
+      if (step.canSub) numHint.textContent = `${stage.partial} - ${step.product} は…? (${placeName(0)}から じゅんに)`;
       else numHint.textContent = `ひけない! へらすを えらぼう`;
     } else if (step.kind === 'orosu') {
       numHint.textContent = `${step.value} を おろそう`;
@@ -1654,7 +1893,8 @@ function getExpectedDigits(step) {
   if (step.kind === 'hiku') {
     if (!step.canSub) return [];
     const stage = c.plan.stages[step.stageIdx];
-    return String(stage.remainder).split('');
+    // v2.7.0: 筆算の慣習(一の位から計算する)に合わせ、入力順を一の位からにする
+    return String(stage.remainder).split('').reverse();
   }
   return [];
 }
@@ -1678,7 +1918,8 @@ function getInputCellIds(step) {
     const startCol = stage.partialEnd - len + 1;
     const ids = [];
     for (let i = startCol; i <= stage.partialEnd; i++) ids.push(`r-${step.position}-${i}`);
-    return ids;
+    // v2.7.0: getExpectedDigits と対にして、一の位(partialEnd側)から入力させる
+    return ids.reverse();
   }
   return [];
 }
@@ -1699,9 +1940,19 @@ function handleStepClick(stepKind) {
       // 商がたたないくらい: 指隠しはせず、× を押してもらう
       clearAllMasks();
       enableNumpad(true);
-    } else if (expected.kind === 'tateru' || expected.kind === 'herasu') {
+    } else if (expected.kind === 'tateru') {
       setupMaskingForTateru(expected);
       enableNumpad(true);
+    } else if (expected.kind === 'herasu') {
+      // v2.9.0: 「へらす」を押した瞬間に自動で1小さい商を立てる(数字入力の工程を省く)
+      clearAllMasks();
+      enableNumpad(false);
+      const cellIds = getInputCellIds(expected);
+      const qCell = document.getElementById(cellIds[0]);
+      if (qCell) placeReducedQuotient(qCell, expected.value);
+      c.inputBuffer = [String(expected.value)];
+      advanceStep();
+      return;
     } else if (expected.kind === 'kakeru') {
       clearAllMasks();
       startMultInput(expected);
@@ -1714,7 +1965,9 @@ function handleStepClick(stepKind) {
         updateStepHint();
         return;  // 以降のspotlight/hint更新はスキップ(へらす誘導済み)
       } else {
-        enableNumpad(true);
+        // v2.8.0: くり下がりの発生位置を計算しておく(実際のnumpad有効化はゲート判定に任せる)
+        c.hikuBorrowEvents = computeBorrowColumns(expected);
+        c.hikuBorrowResolved = new Set();
       }
     } else {
       enableNumpad(true);
@@ -1722,6 +1975,7 @@ function handleStepClick(stepKind) {
     spotlightForStep(expected);
     showHintForStep(expected);
     updateStepHint();
+    if (expected.kind === 'hiku' && expected.canSub) updateHikuBorrowGate(expected);  // v2.8.0
   } else {
     const btn = document.querySelector(`.step-btn[data-step="${stepKind}"]`);
     if (btn) { btn.classList.add('wrong'); setTimeout(() => btn.classList.remove('wrong'), 600); }
@@ -1787,6 +2041,7 @@ function placeReducedQuotient(qCell, num) {
 function handleNumClick(num) {
   const c = state.current;
   if (!c || c.completed || !c.stepConfirmed) return;
+  if (document.getElementById('numpadPanel').classList.contains('disabled')) return;  // v2.8.0: かりる待ちなどの明示ガード
   const step = c.plan.steps[c.stepIdx];
   if (!step) return;
   resetIdleTimer();
@@ -1822,6 +2077,9 @@ function handleNumClick(num) {
     }
     if (c.inputBuffer.length === expected.length) {
       advanceStep();
+    } else if (step.kind === 'hiku') {
+      // v2.8.0: 次の位がくり下がり待ちなら numpad を止めて「かりる」ボタンを出す
+      updateHikuBorrowGate(step);
     }
   } else {
     const cellId = cellIds[bufIdx];
@@ -2069,9 +2327,8 @@ function layoutOneHissan(hEl, mcell, topPx, leftPx) {
   if (hEl.classList.contains('rejected')) {
     addStrike(hEl, mcell, prodLen);
     addNote(hEl, mcell, '✗ ひけない', COLS, ROW_PROD);
-  } else if (hEl.classList.contains('accepted')) {
-    addNote(hEl, mcell, '✓ これだ!', COLS, ROW_PROD);
   }
+  // v2.8.3: 正解時の「✓ これだ!」注記は「せいかい!」表示と重なって煩雑だったため削除
 }
 
 function addStrike(hEl, mcell, prodLen) {
@@ -2272,9 +2529,14 @@ function transcribeProductToDivision(done) {
   const hissans = ws.querySelectorAll('.mult-hissan');
   const lastH = hissans[hissans.length - 1];
 
-  // 転記先の p- マスをハイライト(赤枠)
+  // v2.8.4: へらしたあとの転記で、前の(たてすぎた)積の桁が残らないように積の行をクリア
+  clearProductRow(stage);
+
+  // 転記先の p- マスをハイライト(赤枠)。startCol は負(左へはみ出し)になることがある。
   const startCol = stage.partialEnd - prodLen + 1;
   showProductRowHighlight(step.position, startCol, prodLen, cell);
+  // 引き算の線も、はみ出したぶんだけ左へのばす
+  adjustSubLine(step.position, startCol, cell);
 
   // 各桁ごとに飛ぶ数字を作る
   const divRect = div.getBoundingClientRect();
@@ -2286,9 +2548,9 @@ function transcribeProductToDivision(done) {
   for (let pc = 0; pc < prodLen; pc++) {
     // かけ算ひっ算側のソースセル(data-prodcol=pc)
     const srcCell = lastH ? lastH.querySelector(`.mult-cell[data-prodcol="${pc}"]`) : null;
-    // 転記先: p-{position}-{partialEnd - pc}
+    // 転記先: partialEnd から左へ。負になったら はみ出しマス(ov)。
     const destCol = stage.partialEnd - pc;
-    const destId = `p-${step.position}-${destCol}`;
+    const destId = prodCellId(step.position, destCol);
     const destCell = document.getElementById(destId);
     if (!srcCell || !destCell) { landed++; continue; }
 
@@ -2340,6 +2602,31 @@ function transcribeProductToDivision(done) {
   }
 
   if (totalToLand === 0 && done) done();
+}
+
+/* v2.8.4: 積の行(はみ出しマスも含む)をまっさらにする */
+function clearProductRow(stage) {
+  const c = state.current;
+  for (let i = 0; i < c.n; i++) {
+    const el = document.getElementById(`p-${stage.position}-${i}`);
+    if (el) el.textContent = '';
+  }
+  const ovMax = productOverflowCols(stage);
+  for (let k = 1; k <= ovMax; k++) {
+    const el = document.getElementById(prodCellId(stage.position, -k));
+    if (el) el.textContent = '';
+  }
+}
+
+/* v2.8.4: 引き算の線を、積のはみ出しに合わせてのばす/もどす */
+function adjustSubLine(position, startCol, cell) {
+  const c = state.current;
+  const sub = document.getElementById(`subline-${position}`);
+  if (!sub) return;
+  const FIRST = String(c.divisor).length;
+  const over = Math.max(0, -startCol);          // 左へはみ出したマス数
+  sub.style.left  = ((FIRST - over) * cell) + 'px';
+  sub.style.width = ((c.n + over) * cell) + 'px';
 }
 
 function showProductRowHighlight(position, startCol, prodLen, cell) {
@@ -2551,32 +2838,12 @@ function loadQuestion() {
   resetIdleTimer();
 }
 
-function updateCalcHintButton() {
-  const btn = document.getElementById('hintBtn');
-  if (!btn) return;
-  btn.classList.remove('attention', 'active');
-  btn.style.display = (state.mode === 'random') ? 'none' : '';
-}
-
-/* ---------- IDLE ---------- */
-let idleTimer = null;
-const IDLE_MS = 12000;
-function resetIdleTimer() {
-  if (idleTimer) clearTimeout(idleTimer);
-  if (!state.current || state.current.hintRequested) return;
-  const qNum = state.qIdx + 1;
-  if (state.mode !== 'fixed' || qNum <= 3) return;
-  idleTimer = setTimeout(() => triggerHintAttention(), IDLE_MS);
-}
-function clearIdleTimer() { if (idleTimer) clearTimeout(idleTimer); idleTimer = null; }
-function triggerHintAttention() {
-  const btn = document.getElementById('hintBtn');
-  if (!btn) return;
-  if (state.current && state.current.hintRequested) return;
-  const qNum = state.qIdx + 1;
-  if (state.mode !== 'fixed' || qNum <= 3) return;
-  btn.classList.add('attention');
-}
+/* v2.10.0: ヒントボタンを削除したため、旧ボタンの表示更新/アイドル誘導は不要になった。
+   呼び出し箇所はそのまま残してあるが、どちらも何もしない。 */
+function updateCalcHintButton() {}
+function resetIdleTimer() {}
+function clearIdleTimer() {}
+function triggerHintAttention() {}
 
 /* ---------- STEP BUTTON SHUFFLE ---------- */
 function shuffleStepButtons(shouldShuffle) {
@@ -2607,7 +2874,9 @@ function buildQuestionSet() {
     let guard = 0;
     while (state.questions.length < QUESTIONS_PER_LEVEL && guard < 500) {
       guard++;
-      const q = lvl.randomGen();
+      // 何問目(0始まり)を生成中かを渡す(レベル2の3問目/5問目のような
+      // 「出題順に応じた条件」を randomGen 側で使えるようにするため)
+      const q = lvl.randomGen(state.questions.length);
       const key = q.join(',');
       if (!seen.has(key)) { seen.add(key); state.questions.push([q[0], q[1], state.level]); }
     }
@@ -2689,55 +2958,6 @@ function setupTitleScreen() {
 }
 function updateStartBtn() { document.getElementById('startBtn').disabled = !state.level; }
 
-/* ---------- KUKU TABLE ---------- */
-function buildKukuTable() {
-  const tbl = document.getElementById('kukuTable');
-  tbl.innerHTML = '';
-  const corner = document.createElement('div');
-  corner.className = 'kuku-cell kuku-header'; corner.textContent = '×';
-  tbl.appendChild(corner);
-  for (let c = 1; c <= 9; c++) { const h = document.createElement('div'); h.className = 'kuku-cell kuku-header'; h.textContent = c; tbl.appendChild(h); }
-  for (let r = 1; r <= 9; r++) {
-    const rh = document.createElement('div'); rh.className = 'kuku-cell kuku-row-header'; rh.textContent = r; tbl.appendChild(rh);
-    for (let c = 1; c <= 9; c++) { const cell = document.createElement('div'); cell.className = 'kuku-cell'; cell.textContent = r*c; tbl.appendChild(cell); }
-  }
-}
-
-/* ---------- HINT MODAL ---------- */
-function setupHintModal() {
-  const modal = document.getElementById('hintModal');
-  const btn = document.getElementById('hintBtn');
-  document.getElementById('hintCloseBtn').onclick = () => modal.classList.remove('active');
-  modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
-  const LONG_PRESS_MS = 500;
-  let pressTimer = null, longPressed = false;
-  function startPress(e) {
-    e.preventDefault(); longPressed = false;
-    pressTimer = setTimeout(() => { longPressed = true; modal.classList.add('active'); if (navigator.vibrate) navigator.vibrate(30); }, LONG_PRESS_MS);
-  }
-  function endPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } if (longPressed) return; handleHintButtonTap(); }
-  function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } longPressed = true; }
-  btn.addEventListener('touchstart', startPress, { passive: false });
-  btn.addEventListener('touchend', endPress);
-  btn.addEventListener('touchcancel', cancelPress);
-  btn.addEventListener('mousedown', startPress);
-  btn.addEventListener('mouseup', endPress);
-  btn.addEventListener('mouseleave', cancelPress);
-}
-function handleHintButtonTap() {
-  if (!state.current) return;
-  const qNum = state.qIdx + 1;
-  if (state.mode !== 'fixed' || qNum <= 3) return;
-  state.current.hintRequested = true;
-  const btn = document.getElementById('hintBtn');
-  btn.classList.remove('attention'); btn.classList.add('active');
-  clearIdleTimer();
-  if (state.current.stepConfirmed) {
-    const step = state.current.plan.steps[state.current.stepIdx];
-    if (step) showHintForStep(step);
-  }
-}
-
 /* ---------- RESULT ---------- */
 function showResults() {
   showScreen('resultScreen');
@@ -2782,6 +3002,8 @@ function setupMainScreen() {
       handleNumClick(raw === '×' ? '×' : parseInt(raw, 10));
     };
   });
+  const borrowBtn = document.getElementById('borrowBtn');
+  if (borrowBtn) borrowBtn.onclick = handleBorrowClick;  // v2.8.0
   document.getElementById('skipBtn').onclick = () => {
     if (!state.current || state.current.completed) return;
     clearIdleTimer(); resetMarkAndButtons();
@@ -2818,6 +3040,7 @@ function handleResize() {
   if (step && state.current.stepConfirmed) {
     spotlightForStep(step); showHintForStep(step);
     if (step.kind === 'tateru' || step.kind === 'herasu') setupMaskingForTateru(step);
+    if (step.kind === 'hiku' && step.canSub) updateHikuBorrowGate(step);  // v2.8.0
   }
 }
 window.addEventListener('resize', () => { if (resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(handleResize, 120); });
@@ -2835,8 +3058,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setupTitleScreen();
   setupMainScreen();
   setupResultScreen();
-  buildKukuTable();
-  setupHintModal();
 });
 </script>
 </div><!-- /#stage -->
