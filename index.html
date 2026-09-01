@@ -626,52 +626,6 @@
   .skip-btn:hover { opacity: 0.95; }
   .skip-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); opacity: 1; }
 
-  /* ============ MODAL ============ */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(44,58,74,0.6);
-    display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px);
-  }
-  .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
-  .modal {
-    background: var(--paper); border-radius: 2cqw; padding: 3cqh 3cqw;
-    max-width: 92cqw; max-height: 92cqh; box-shadow: 0 20px 60px var(--shadow-deep);
-    position: relative; animation: pop 0.3s;
-  }
-  .modal-close {
-    position: absolute; top: -1cqh; right: -1cqh; width: 5cqh; height: 5cqh;
-    background: var(--accent-2); color: white; border-radius: 50%;
-    font-size: 22px; font-weight: 900; box-shadow: 0 4px 12px var(--shadow);
-  }
-  .modal-title {
-    font-family: var(--font-display); font-weight: 900;
-    font-size: 26px; text-align: center; color: var(--ink); margin-bottom: 2cqh;
-  }
-  .modal-title .deco { color: var(--accent); }
-  .modal-hint-note {
-    margin-top: 2cqh; text-align: center; font-family: var(--font-hand);
-    font-size: 16px; color: var(--ink-soft);
-    background: var(--paper-2); padding: 1cqh 2cqw; border-radius: 999px; border: 1px dashed var(--line);
-  }
-  .kuku-table { display: grid; grid-template-columns: auto repeat(9, 1fr); gap: 2px; background: var(--ink); border-radius: 1cqw; overflow: hidden; padding: 2px; }
-  .kuku-cell { background: white; padding: 0.6cqh 0.4cqw; text-align: center; font-family: var(--font-hand); font-size: 18px; color: var(--ink); font-weight: 600; }
-  .kuku-header { background: var(--accent); color: white; font-family: var(--font-display); font-weight: 900; }
-  .kuku-row-header { background: var(--blue); color: white; font-family: var(--font-display); font-weight: 900; }
-
-  /* ヒントボタン */
-  .hint-btn-container {
-    position: absolute; top: 1.5cqh; right: calc(1.5cqh + 136px); z-index: 6;
-    display: flex; flex-direction: column; align-items: center; gap: 0.3cqh;
-    background: white; border: 3px solid var(--yellow); border-radius: 1.2cqw; padding: 1cqh 1.2cqw;
-    box-shadow: 0 4px 0 var(--yellow), 0 6px 16px rgba(245,200,66,0.25);
-    cursor: pointer; font-family: var(--font-display); transition: all 0.15s;
-    animation: hintIdleGlow 2.5s ease-in-out infinite;
-  }
-  .hint-btn-container:hover { transform: translateY(-2px); }
-  .hint-btn-container:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--yellow); }
-  .hint-btn-icon { font-size: 26px; line-height: 1.25; }
-  .hint-btn-label { font-size: 15px; font-weight: 700; color: #b8860b; letter-spacing: 0.06em; }
-  @keyframes hintIdleGlow { 0%,100% { box-shadow: 0 4px 0 var(--yellow), 0 6px 16px rgba(245,200,66,0.25); } 50% { box-shadow: 0 4px 0 var(--yellow), 0 6px 24px rgba(245,200,66,0.55); } }
-
   /* ============ RESULT SCREEN ============ */
   #resultScreen { flex-direction: column; align-items: center; justify-content: center; padding: 4cqh 4cqw; gap: 3cqh; }
   .result-card {
@@ -796,11 +750,6 @@
       </button>
       <!-- スキップ -->
       <button class="skip-btn" id="skipBtn" title="この もんだいを スキップ">スキップ →</button>
-      <!-- ヒント -->
-      <button class="hint-btn-container" id="hintBtn" title="タップ:けいさんヒント / 長押し:くくひょう">
-        <span class="hint-btn-icon">💡</span>
-        <span class="hint-btn-label">ヒント</span>
-      </button>
       <!-- 赤丸 -->
       <div class="big-maru" id="bigMaru" style="display:none;">
         <div class="maru-svg-wrap">
@@ -884,16 +833,6 @@
   </div>
 </div>
 
-<!-- ============ HINT MODAL ============ -->
-<div class="modal-overlay" id="hintModal">
-  <div class="modal">
-    <button class="modal-close" id="hintCloseBtn">×</button>
-    <div class="modal-title"><span class="deco">★</span> くくひょう <span class="deco">★</span></div>
-    <div class="kuku-table" id="kukuTable"></div>
-    <div class="modal-hint-note">💡 タップ:けいさんヒント　長押し:くくひょう</div>
-  </div>
-</div>
-
 <script>
 /* ---------- 10.1インチ基準ステージのスケーリング ---------- */
 const DESIGN_W = 1280, DESIGN_H = 800;
@@ -919,7 +858,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.11.0';
+const APP_VERSION = '2.12.0';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -1599,7 +1538,7 @@ function showHintForStep(step) {
   if (state.mode === 'random') return;
   const qNum = state.qIdx + 1;
   const autoShow = (qNum <= 3);
-  if (!autoShow && !state.current.hintRequested) return;
+  if (!autoShow) return;
 
   const c = state.current;
   const stage = c.plan.stages[step.stageIdx];
@@ -1866,7 +1805,6 @@ function handleBorrowClick() {
   const event = c.hikuBorrowEvents.find(e => e.col === col && !c.hikuBorrowResolved.has(col));
   if (!event) return;
 
-  resetIdleTimer();
   const lendCols = new Set(c.hikuBorrowEvents.map(e => e.fromCol));
   renderBorrowBadge(step, event, lendCols);
   c.hikuBorrowResolved.add(col);
@@ -1973,7 +1911,6 @@ function handleStepClick(stepKind) {
   if (!c || c.completed) return;
   const expected = c.plan.steps[c.stepIdx];
   if (!expected || c.stepConfirmed) return;
-  resetIdleTimer();
 
   if (stepKind === expected.kind) {
     c.stepConfirmed = true;
@@ -2023,7 +1960,6 @@ function handleStepClick(stepKind) {
     const btn = document.querySelector(`.step-btn[data-step="${stepKind}"]`);
     if (btn) { btn.classList.add('wrong'); setTimeout(() => btn.classList.remove('wrong'), 600); }
     c.errorCount++;
-    triggerHintAttention();
   }
 }
 
@@ -2087,7 +2023,6 @@ function handleNumClick(num) {
   if (document.getElementById('numpadPanel').classList.contains('disabled')) return;  // v2.8.0: かりる待ちなどの明示ガード
   const step = c.plan.steps[c.stepIdx];
   if (!step) return;
-  resetIdleTimer();
 
   // かける は専用の入力処理
   if (step.kind === 'kakeru') { handleMultNumInput(num); return; }
@@ -2131,7 +2066,6 @@ function handleNumClick(num) {
     const numBtn = document.querySelector(`.num-btn[data-num="${num}"]`);
     if (numBtn) { numBtn.classList.add('wrong'); setTimeout(() => numBtn.classList.remove('wrong'), 600); }
     c.errorCount++;
-    triggerHintAttention();
   }
 }
 
@@ -2523,7 +2457,6 @@ function handleMultNumInput(num) {
     c.multTyping = '';   // 入力やり直し
     relayoutMultWorkspace();
     c.errorCount++;
-    triggerHintAttention();
   }
 }
 
@@ -2736,7 +2669,6 @@ function advanceStep() {
     c.completed = true;
     if (c.errorCount <= 1) state.correctCount++;
     document.getElementById('correctDisplay').textContent = state.correctCount;
-    clearIdleTimer();
     clearDimUnused();
     showRemainderTag();
     showCorrectMark();
@@ -2864,48 +2796,19 @@ function loadQuestion() {
     dividend, divisor, plan, digits: plan.digits, n: plan.n, srcLv,
     stepIdx: 0, stepConfirmed: false, inputBuffer: [], multBuffer: [], multExpected: '',
     dimArmedCol: null,
-    errorCount: 0, completed: false, hintRequested: false
+    errorCount: 0, completed: false
   };
   document.getElementById('qNumDisplay').textContent = state.qIdx + 1;
   document.getElementById('qTotalDisplay').textContent = state.questions.length;
   // ワークスペースをクリア
   document.getElementById('multWorkspace').innerHTML = '';
   shuffleStepButtons(state.mode === 'random');
-  updateCalcHintButton();
   renderDivision();
   updateDimUnused();
   updateStepHint();
   enableNumpad(false);
   clearSpotlight();
   clearAllMasks();
-  resetIdleTimer();
-}
-
-function updateCalcHintButton() {
-  const btn = document.getElementById('hintBtn');
-  if (!btn) return;
-  btn.classList.remove('attention', 'active');
-  btn.style.display = (state.mode === 'random') ? 'none' : '';
-}
-
-/* ---------- IDLE ---------- */
-let idleTimer = null;
-const IDLE_MS = 12000;
-function resetIdleTimer() {
-  if (idleTimer) clearTimeout(idleTimer);
-  if (!state.current || state.current.hintRequested) return;
-  const qNum = state.qIdx + 1;
-  if (state.mode !== 'fixed' || qNum <= 3) return;
-  idleTimer = setTimeout(() => triggerHintAttention(), IDLE_MS);
-}
-function clearIdleTimer() { if (idleTimer) clearTimeout(idleTimer); idleTimer = null; }
-function triggerHintAttention() {
-  const btn = document.getElementById('hintBtn');
-  if (!btn) return;
-  if (state.current && state.current.hintRequested) return;
-  const qNum = state.qIdx + 1;
-  if (state.mode !== 'fixed' || qNum <= 3) return;
-  btn.classList.add('attention');
 }
 
 /* ---------- STEP BUTTON SHUFFLE ---------- */
@@ -3021,55 +2924,6 @@ function setupTitleScreen() {
 }
 function updateStartBtn() { document.getElementById('startBtn').disabled = !state.level; }
 
-/* ---------- KUKU TABLE ---------- */
-function buildKukuTable() {
-  const tbl = document.getElementById('kukuTable');
-  tbl.innerHTML = '';
-  const corner = document.createElement('div');
-  corner.className = 'kuku-cell kuku-header'; corner.textContent = '×';
-  tbl.appendChild(corner);
-  for (let c = 1; c <= 9; c++) { const h = document.createElement('div'); h.className = 'kuku-cell kuku-header'; h.textContent = c; tbl.appendChild(h); }
-  for (let r = 1; r <= 9; r++) {
-    const rh = document.createElement('div'); rh.className = 'kuku-cell kuku-row-header'; rh.textContent = r; tbl.appendChild(rh);
-    for (let c = 1; c <= 9; c++) { const cell = document.createElement('div'); cell.className = 'kuku-cell'; cell.textContent = r*c; tbl.appendChild(cell); }
-  }
-}
-
-/* ---------- HINT MODAL ---------- */
-function setupHintModal() {
-  const modal = document.getElementById('hintModal');
-  const btn = document.getElementById('hintBtn');
-  document.getElementById('hintCloseBtn').onclick = () => modal.classList.remove('active');
-  modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
-  const LONG_PRESS_MS = 500;
-  let pressTimer = null, longPressed = false;
-  function startPress(e) {
-    e.preventDefault(); longPressed = false;
-    pressTimer = setTimeout(() => { longPressed = true; modal.classList.add('active'); if (navigator.vibrate) navigator.vibrate(30); }, LONG_PRESS_MS);
-  }
-  function endPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } if (longPressed) return; handleHintButtonTap(); }
-  function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } longPressed = true; }
-  btn.addEventListener('touchstart', startPress, { passive: false });
-  btn.addEventListener('touchend', endPress);
-  btn.addEventListener('touchcancel', cancelPress);
-  btn.addEventListener('mousedown', startPress);
-  btn.addEventListener('mouseup', endPress);
-  btn.addEventListener('mouseleave', cancelPress);
-}
-function handleHintButtonTap() {
-  if (!state.current) return;
-  const qNum = state.qIdx + 1;
-  if (state.mode !== 'fixed' || qNum <= 3) return;
-  state.current.hintRequested = true;
-  const btn = document.getElementById('hintBtn');
-  btn.classList.remove('attention'); btn.classList.add('active');
-  clearIdleTimer();
-  if (state.current.stepConfirmed) {
-    const step = state.current.plan.steps[state.current.stepIdx];
-    if (step) showHintForStep(step);
-  }
-}
-
 /* ---------- RESULT ---------- */
 function showResults() {
   showScreen('resultScreen');
@@ -3118,14 +2972,14 @@ function setupMainScreen() {
   if (borrowBtn) borrowBtn.onclick = handleBorrowClick;  // v2.8.0
   document.getElementById('skipBtn').onclick = () => {
     if (!state.current || state.current.completed) return;
-    clearIdleTimer(); resetMarkAndButtons();
+    resetMarkAndButtons();
     state.qIdx++;
     if (state.qIdx >= state.questions.length) showResults();
     else loadQuestion();
   };
   document.getElementById('backBtn').onclick = () => {
     if (confirm('タイトルへ もどりますか？ いまの もんだいは リセットされます。')) {
-      resetMarkAndButtons(); clearIdleTimer(); showScreen('titleScreen');
+      resetMarkAndButtons(); showScreen('titleScreen');
     }
   };
 }
@@ -3170,8 +3024,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setupTitleScreen();
   setupMainScreen();
   setupResultScreen();
-  buildKukuTable();
-  setupHintModal();
 });
 </script>
 </div><!-- /#stage -->
