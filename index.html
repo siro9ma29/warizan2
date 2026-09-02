@@ -858,7 +858,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.12.0';
+const APP_VERSION = '2.13.0';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -1930,6 +1930,20 @@ function handleStepClick(stepKind) {
       const cellIds = getInputCellIds(expected);
       const qCell = document.getElementById(cellIds[0]);
       if (qCell) placeReducedQuotient(qCell, expected.value);
+      c.inputBuffer = [String(expected.value)];
+      advanceStep();
+      return;
+    } else if (expected.kind === 'orosu') {
+      // v2.13.0: 「おろす」を押した瞬間に自動で数をおろす(数字入力の工程を省く)
+      clearAllMasks();
+      enableNumpad(false);
+      const cellIds = getInputCellIds(expected);
+      const dropCell = document.getElementById(cellIds[0]);
+      if (dropCell) {
+        dropCell.textContent = expected.value;
+        dropCell.classList.add('drop-anim');
+        setTimeout(() => dropCell.classList.remove('drop-anim'), 700);
+      }
       c.inputBuffer = [String(expected.value)];
       advanceStep();
       return;
