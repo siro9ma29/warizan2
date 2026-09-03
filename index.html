@@ -858,7 +858,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.13.0';
+const APP_VERSION = '2.13.1';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -942,7 +942,7 @@ const LEVELS = {
   },
   4: {
     title: 'レベル 4', desc: '3けた÷2けた\nしょうが 2けた',
-    fixed: [[345,21],[546,21],[682,28],[926,43],[672,32],[713,49],[768,24],[709,54],[883,28],[602,35]],
+    fixed: [[345,21],[546,21],[747,53],[926,43],[543,25],[713,49],[768,24],[709,54],[883,28],[602,35]],
     randomGen: () => genByCond(a => a.dvLen===2 && a.ddLen===3 && a.divisor>=20 &&
                                     a.qDigits===2 && !a.zeroInQ)
   },
