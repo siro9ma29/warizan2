@@ -508,6 +508,36 @@
   }
   @keyframes textPop { 0% { transform: translateY(20px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
 
+  /* 大きな赤ばつ(1つの工程で3回まちがえたときの不正解表示) */
+  .big-batsu {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 10; gap: 1cqh;
+  }
+  .big-batsu .batsu-svg-wrap {
+    width: 40cqh; max-width: 90%; height: 40cqh; max-height: 90%;
+    animation: maruDraw 0.6s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+  }
+  .big-batsu svg { width: 100%; height: 100%; }
+  .big-batsu line {
+    stroke: var(--maru-red); stroke-width: 12; stroke-linecap: round;
+    stroke-dasharray: 400; stroke-dashoffset: 400;
+    filter: drop-shadow(0 4px 8px rgba(230, 57, 70, 0.3));
+  }
+  .big-batsu line:nth-child(1) { animation: batsuStroke1 0.35s ease-out forwards; }
+  .big-batsu line:nth-child(2) { animation: batsuStroke2 0.35s ease-out 0.3s forwards; }
+  @keyframes batsuStroke1 { to { stroke-dashoffset: 0; } }
+  @keyframes batsuStroke2 { to { stroke-dashoffset: 0; } }
+  .big-batsu .fuseikai-text {
+    white-space: nowrap;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 34px; color: var(--maru-red);
+    background: white; padding: 0.4em 1.2em; border-radius: 999px;
+    border: 3px solid var(--maru-red);
+    box-shadow: 0 6px 0 #b32530, 0 10px 25px rgba(230, 57, 70, 0.3);
+    letter-spacing: 0.15em; opacity: 0; animation: textPop 0.4s 0.65s forwards;
+  }
+
   @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
   @keyframes flashRed { 0%,100% { background: transparent; } 50% { background: rgba(232,90,79,0.3); border-radius: 8px; } }
   @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
@@ -759,6 +789,16 @@
         </div>
         <div class="seikai-text">せいかい！</div>
       </div>
+      <!-- 赤ばつ(1つの工程で3回まちがえたときの不正解表示) -->
+      <div class="big-batsu" id="bigBatsu" style="display:none;">
+        <div class="batsu-svg-wrap">
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+            <line x1="70" y1="70" x2="330" y2="330"></line>
+            <line x1="330" y1="70" x2="70" y2="330"></line>
+          </svg>
+        </div>
+        <div class="fuseikai-text">ふせいかい</div>
+      </div>
       <button class="next-q-btn" id="nextQBtn">つぎの もんだいへ →</button>
     </div>
 
@@ -858,7 +898,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.13.1';
+const APP_VERSION = '2.15.0';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -942,7 +982,7 @@ const LEVELS = {
   },
   4: {
     title: 'レベル 4', desc: '3けた÷2けた\nしょうが 2けた',
-    fixed: [[345,21],[546,21],[747,53],[926,43],[543,25],[713,49],[768,24],[709,54],[883,28],[602,35]],
+    fixed: [[345,21],[546,21],[682,28],[926,43],[672,32],[713,49],[768,24],[709,54],[883,28],[602,35]],
     randomGen: () => genByCond(a => a.dvLen===2 && a.ddLen===3 && a.divisor>=20 &&
                                     a.qDigits===2 && !a.zeroInQ)
   },
@@ -953,7 +993,10 @@ const LEVELS = {
   },
   6: {
     title: 'レベル 6', desc: 'しょうに 0が\nたつ',
-    fixed: [[941,23],[960,16],[654,32],[840,42],[810,27],[572,14],[850,17],[814,16],[639,21],[680,22]],
+    /* 固定10問はすべて商の立て直し(修正)2回まで(maxCorr<=2)に統一。
+       2問目・7問目・8問目は旧版でmaxCorr=3だったため差し替え済み
+       (960÷16→640÷16, 850÷17→510÷17, 814÷16→542÷18)。 */
+    fixed: [[941,23],[640,16],[654,32],[840,42],[810,27],[572,14],[510,17],[542,18],[639,21],[680,22]],
     randomGen: () => genByCond(a => a.dvLen===2 && a.ddLen===3 && a.divisor>=11 &&
                                     a.qDigits===2 && a.zeroInQ)
   },
@@ -1915,6 +1958,7 @@ function handleStepClick(stepKind) {
   if (stepKind === expected.kind) {
     c.stepConfirmed = true;
     c.inputBuffer = [];
+    c.stepWrongCount = 0;   // v2.14.0: 工程を新しく押すたびに、すうじパネルのまちがいカウントをリセット
     armDimForStep(expected);   // たてる/へらす を押した瞬間に「使わないけた」を薄く
     if (expected.kind === 'tateru' && expected.skip) {
       // 商がたたないくらい: 指隠しはせず、× を押してもらう
@@ -2080,6 +2124,8 @@ function handleNumClick(num) {
     const numBtn = document.querySelector(`.num-btn[data-num="${num}"]`);
     if (numBtn) { numBtn.classList.add('wrong'); setTimeout(() => numBtn.classList.remove('wrong'), 600); }
     c.errorCount++;
+    c.stepWrongCount = (c.stepWrongCount || 0) + 1;
+    if (c.stepWrongCount >= 3) { failCurrentQuestion(); return; }
   }
 }
 
@@ -2471,6 +2517,8 @@ function handleMultNumInput(num) {
     c.multTyping = '';   // 入力やり直し
     relayoutMultWorkspace();
     c.errorCount++;
+    c.stepWrongCount = (c.stepWrongCount || 0) + 1;
+    if (c.stepWrongCount >= 3) { failCurrentQuestion(); return; }
   }
 }
 
@@ -2692,6 +2740,20 @@ function advanceStep() {
   }
 }
 
+/* v2.14.0: 1つの工程(たてる/かける/ひく/おろす)で すうじパネルを3回まちがえたら、
+   その もんだいを 不正解として 打ち切り、赤ばつを表示して 次の もんだいへ進める */
+function failCurrentQuestion() {
+  const c = state.current;
+  if (!c || c.completed) return;
+  c.completed = true;
+  c.stepConfirmed = false;
+  enableNumpad(false);
+  clearSpotlight();
+  clearMaskables();
+  clearDimUnused();
+  showIncorrectMark();
+}
+
 function showRemainderTag() {
   const c = state.current;
   if (!c || c.plan.remainder === 0) return;
@@ -2726,9 +2788,32 @@ function showCorrectMark() {
   nextBtn.onclick = goNextQuestion;
 }
 
-function positionCorrectMark() {
-  const maru = document.getElementById('bigMaru');
-  const wrap = maru.querySelector('.maru-svg-wrap');
+/* ---------- INCORRECT MARK (赤ばつ) ---------- */
+function showIncorrectMark() {
+  const batsu = document.getElementById('bigBatsu');
+  const nextBtn = document.getElementById('nextQBtn');
+  batsu.style.display = 'flex';
+  positionEndMark('bigBatsu');
+  const wrap = batsu.querySelector('.batsu-svg-wrap');
+  if (wrap) { wrap.style.animation = 'none'; void wrap.offsetWidth; wrap.style.animation = 'maruDraw 0.6s cubic-bezier(0.34, 1.2, 0.64, 1) forwards'; }
+  const lines = batsu.querySelectorAll('line');
+  lines.forEach((ln, i) => {
+    ln.style.animation = 'none'; void ln.offsetWidth;
+    ln.style.animation = `batsuStroke${i + 1} 0.35s ease-out ${i === 0 ? 0 : 0.3}s forwards`;
+  });
+  const text = batsu.querySelector('.fuseikai-text');
+  if (text) { text.style.animation = 'none'; void text.offsetWidth; text.style.animation = 'textPop 0.4s 0.65s forwards'; }
+  nextBtn.style.animation = 'none'; void nextBtn.offsetWidth; nextBtn.style.animation = 'nextBtnIn 0.5s 0.8s both';
+  nextBtn.classList.add('show');
+  nextBtn.onclick = goNextQuestion;
+}
+
+function positionCorrectMark() { positionEndMark('bigMaru'); }
+
+/* せいかい(◯)・ふせいかい(✗)どちらの表示にも使う、共通の配置ロジック */
+function positionEndMark(elId) {
+  const maru = document.getElementById(elId);
+  const wrap = maru.querySelector('.maru-svg-wrap') || maru.querySelector('.batsu-svg-wrap');
   const panel = document.getElementById('calcPanel');
   const division = document.getElementById('division');
   if (!maru || !wrap || !panel || !division) return;
@@ -2762,9 +2847,9 @@ function positionCorrectMark() {
     size = Math.min(pw, boxH) * 0.45; boxW = pw; boxLeft = 0; boxTop = 0;
   }
 
-  // 「せいかい!」の文字は置き場所の幅に合わせて縮める(はみ出し防止)
-  const seikaiEl = maru.querySelector('.seikai-text');
-  if (seikaiEl) seikaiEl.style.fontSize = Math.max(16, Math.min(38, boxW / 8)) + 'px';
+  // 「せいかい!」「ふせいかい」の文字は置き場所の幅に合わせて縮める(はみ出し防止)
+  const labelEl = maru.querySelector('.seikai-text') || maru.querySelector('.fuseikai-text');
+  if (labelEl) labelEl.style.fontSize = Math.max(16, Math.min(38, boxW / 8)) + 'px';
   maru.style.left = boxLeft + 'px'; maru.style.top = boxTop + 'px';
   maru.style.width = boxW + 'px'; maru.style.height = boxH + 'px';
   const circleSize = Math.max(60, size * 0.75);
@@ -2786,10 +2871,13 @@ function goNextQuestion() {
 }
 function resetMarkAndButtons() {
   const maru = document.getElementById('bigMaru');
+  const batsu = document.getElementById('bigBatsu');
   const nextBtn = document.getElementById('nextQBtn');
   maru.style.display = 'none';
+  batsu.style.display = 'none';
   nextBtn.classList.remove('show');
   maru.style.left=''; maru.style.top=''; maru.style.width=''; maru.style.height=''; maru.style.inset='';
+  batsu.style.left=''; batsu.style.top=''; batsu.style.width=''; batsu.style.height=''; batsu.style.inset='';
   nextBtn.style.top=''; nextBtn.style.bottom='';
 }
 
@@ -2810,7 +2898,7 @@ function loadQuestion() {
     dividend, divisor, plan, digits: plan.digits, n: plan.n, srcLv,
     stepIdx: 0, stepConfirmed: false, inputBuffer: [], multBuffer: [], multExpected: '',
     dimArmedCol: null,
-    errorCount: 0, completed: false
+    errorCount: 0, stepWrongCount: 0, completed: false
   };
   document.getElementById('qNumDisplay').textContent = state.qIdx + 1;
   document.getElementById('qTotalDisplay').textContent = state.questions.length;
@@ -3010,7 +3098,8 @@ function handleResize() {
   if (!state.current) return;
   if (!document.getElementById('mainScreen').classList.contains('active')) return;
   if (state.current.completed) {
-    if (document.getElementById('bigMaru').style.display === 'flex') positionCorrectMark();
+    if (document.getElementById('bigMaru').style.display === 'flex') positionEndMark('bigMaru');
+    else if (document.getElementById('bigBatsu').style.display === 'flex') positionEndMark('bigBatsu');
     return;
   }
   // 簡易再描画(入力途中の完全復元は今回は省略、位置のみ追従)
