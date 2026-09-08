@@ -898,7 +898,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.15.0';
+const APP_VERSION = '2.16.0';
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -1063,7 +1063,12 @@ function buildPlan(dividend, divisor) {
     stage.trials.forEach((tr, tIdx) => {
       const isLastTrial = (tIdx === stage.trials.length - 1);
       if (tIdx === 0) {
-        steps.push({ kind:'tateru', stageIdx:sIdx, position:stage.position, value: tr.q });
+        // v2.16.0: 商が0になる段(isZero)では、一の位を隠す見当のやりかたで
+        // 「1」と見積もってしまう子がいる。0だけを正解とせず、1もいったん受け入れて
+        // かける→ひく(ひけない)→へらす→0 の修正ループに合流できるようにする。
+        const tateruStep = { kind:'tateru', stageIdx:sIdx, position:stage.position, value: tr.q };
+        if (stage.isZero) { tateruStep.altValue = 1; tateruStep.altProduct = divisor; }
+        steps.push(tateruStep);
       } else {
         steps.push({ kind:'herasu', stageIdx:sIdx, position:stage.position, value: tr.q });
       }
@@ -2117,6 +2122,11 @@ function handleNumClick(num) {
       // v2.8.0: 次の位がくり下がり待ちなら numpad を止めて「かりる」ボタンを出す
       updateHikuBorrowGate(step);
     }
+  } else if (step.kind === 'tateru' && !step.skip && bufIdx === 0 &&
+             step.altValue !== undefined && String(num) === String(step.altValue)) {
+    // v2.16.0: 商が0になる段で「1」と見積もった場合も受け入れ、
+    // かける→ひく(ひけない)→へらす の修正ループへ合流させる
+    acceptZeroStageAltGuess(step, num);
   } else {
     const cellId = cellIds[bufIdx];
     const cell = document.getElementById(cellId);
@@ -2127,6 +2137,34 @@ function handleNumClick(num) {
     c.stepWrongCount = (c.stepWrongCount || 0) + 1;
     if (c.stepWrongCount >= 3) { failCurrentQuestion(); return; }
   }
+}
+
+/* v2.16.0: 商が0になる段で、子どもが「1」と見積もった場合の受け入れ処理。
+   たてるセルに1を表示したうえで、[かける(1×わる数) → ひく(ひけない) → へらす(0へ)]
+   の3ステップを その場で plan.steps に差し込み、以降は もとの(商0の)かける・ひくへ
+   自然に合流させる。 */
+function acceptZeroStageAltGuess(step, num) {
+  const c = state.current;
+  const cellIds = getInputCellIds(step);
+  const cell = document.getElementById(cellIds[0]);
+  if (cell) {
+    cell.textContent = num;
+    cell.classList.add('correct-pop', 'fade-in');
+    setTimeout(() => cell.classList.remove('correct-pop'), 500);
+  }
+  c.inputBuffer.push(String(num));
+
+  const stage = c.plan.stages[step.stageIdx];
+  const extraSteps = [
+    { kind:'kakeru', stageIdx:step.stageIdx, position:step.position,
+      value: step.altProduct, qForMult: Number(num), canSub:false, trialIdx:0 },
+    { kind:'hiku', stageIdx:step.stageIdx, position:step.position,
+      canSub:false, value:null, product: step.altProduct, partial: stage.partial },
+    { kind:'herasu', stageIdx:step.stageIdx, position:step.position, value: step.value }
+  ];
+  c.plan.steps.splice(c.stepIdx + 1, 0, ...extraSteps);
+
+  advanceStep();
 }
 
 /* ---------- MULT WORKSPACE (かけ算を右に残す) ---------- */
