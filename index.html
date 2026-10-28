@@ -720,6 +720,133 @@
     #rotateHint { display: flex; }
     #stage { visibility: hidden; }
   }
+  :root { --kk-u: 1px; }
+  /* ============ からくり屋敷 (ゲーミフィケーション) ============ */
+  :root { --kk-wood: #8a5a33; --kk-wood-d: #5e3b1f; --kk-paper: #fbf6ea; --kk-gold: #e0a020; --kk-red: #c8382c; }
+  .kk-house {
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--kk-u) * 14);
+    margin: calc(var(--kk-u) * 4) auto 0; padding: calc(var(--kk-u) * 6) calc(var(--kk-u) * 18);
+    background: linear-gradient(#6b4325, #5a381e); color: #fff6df; border-radius: calc(var(--kk-u) * 12);
+    box-shadow: 0 calc(var(--kk-u) * 3) 0 #3e2612; font-weight: 800; width: max-content; max-width: 96vw; box-sizing: border-box; flex-wrap: wrap; row-gap: calc(var(--kk-u) * 2);
+    font-size: calc(var(--kk-u) * 17); line-height: 1.3; position: relative;
+  }
+  .kk-house::before { content: ''; position: absolute; left: 50%; top: calc(var(--kk-u) * -11); transform: translateX(-50%);
+    border-left: calc(var(--kk-u) * 70) solid transparent; border-right: calc(var(--kk-u) * 70) solid transparent;
+    border-bottom: calc(var(--kk-u) * 11) solid #6b4325; }
+  .kk-house > span { white-space: nowrap; }
+  .kk-house .kk-hname { letter-spacing: 0.08em; }
+  .kk-house .kk-prog { background: rgba(255,255,255,0.14); border-radius: 999px; padding: 0 calc(var(--kk-u) * 12); }
+  .kk-house .kk-prog b { color: #ffd76a; font-size: 1.15em; }
+  .kk-house .kk-rank { color: #ffd76a; }
+  .kk-house .kk-bag { letter-spacing: 0.06em; font-size: 1.05em; }
+  .kk-house .kk-bag .kk-none { opacity: 0.35; filter: grayscale(1); }
+  .kk-house.kk-escaped { background: linear-gradient(#b8860b, #8a6208); box-shadow: 0 calc(var(--kk-u) * 3) 0 #5e4205; }
+  .kk-house.kk-escaped::before { border-bottom-color: #b8860b; }
+
+  .level-card { position: relative; }
+  .level-card .kk-room { font-weight: 800; color: var(--kk-wood-d); white-space: nowrap; }
+  .level-card .kk-room .kk-ic { margin-right: 0.15em; }
+  .level-card .kk-room .kk-ic.kk-none { filter: grayscale(1); opacity: 0.35; }
+  .level-card .kk-stars { color: #d8d2c4; letter-spacing: 0.1em; line-height: 1; margin-top: calc(var(--kk-u) * 3); font-size: calc(var(--kk-u) * 17); }
+  .level-card .kk-stars .on { color: var(--kk-gold); }
+  .level-card.kk-cleared { background: linear-gradient(#fffaf0, #fbf0da); }
+  .level-card .kk-hanko {
+    position: absolute; top: calc(var(--kk-u) * 6); right: calc(var(--kk-u) * 6);
+    width: calc(var(--kk-u) * 34); height: calc(var(--kk-u) * 34); border-radius: 50%;
+    border: calc(var(--kk-u) * 2.5) solid var(--kk-red); color: var(--kk-red);
+    font-size: calc(var(--kk-u) * 12); font-weight: 900; line-height: 1.05;
+    display: flex; align-items: center; justify-content: center; transform: rotate(-14deg); background: rgba(255,255,255,0.7);
+  }
+  .level-card .kk-hidden-tag { position: absolute; top: calc(var(--kk-u) * -10); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: calc(var(--kk-u) * 11);
+    color: #fff; background: #7a5aa6; border-radius: 999px; padding: 0 calc(var(--kk-u) * 7); font-weight: 800; }
+
+  /* 出題中のからくり錠 */
+  .kk-lock { display: inline-flex !important; align-items: center; gap: calc(var(--kk-u) * 6); }
+  .kk-lock .kk-gear { display: inline-block; transition: transform 0.5s ease; }
+  .kk-lock .kk-bar { position: relative; display: inline-block; width: calc(var(--kk-u) * 110); height: calc(var(--kk-u) * 12);
+    border-radius: 999px; background: #eee6d6; overflow: hidden; border: 1px solid #d9ccb2; }
+  .kk-lock .kk-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #c88b4a, #e0a020); transition: width 0.35s ease; }
+  .kk-lock.kk-open .kk-bar i { background: linear-gradient(90deg, #e0a020, #ffd76a); }
+  .kk-lock.kk-open .kk-lock-ic { animation: kkPop 0.6s ease; }
+  .kk-lock.kk-fail .kk-bar i { background: #c9c2b5; }
+  @keyframes kkPop { 0% { transform: scale(1); } 40% { transform: scale(1.6) rotate(-10deg); } 100% { transform: scale(1); } }
+
+  /* ふすま (つぎの とびら) */
+  .kk-fusuma { position: absolute; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+  .kk-fusuma .kk-door {
+    position: absolute; top: 0; bottom: 0; width: 50.5%;
+    background-color: var(--kk-paper);
+    background-image:
+      linear-gradient(90deg, rgba(138,90,51,0.18) 2px, transparent 2px),
+      linear-gradient(rgba(138,90,51,0.18) 2px, transparent 2px);
+    background-size: 25% 16.6%;
+    border: calc(var(--kk-u) * 9) solid var(--kk-wood);
+    box-shadow: inset 0 0 0 calc(var(--kk-u) * 2) var(--kk-wood-d);
+    transition: transform 0.65s cubic-bezier(.6,.05,.3,1);
+  }
+  .kk-fusuma .kk-door.l { left: 0; }
+  .kk-fusuma .kk-door.r { right: 0; }
+  .kk-fusuma .kk-door::after { content: ''; position: absolute; top: 50%; width: calc(var(--kk-u) * 22); height: calc(var(--kk-u) * 22);
+    margin-top: calc(var(--kk-u) * -11); border-radius: 50%; background: radial-gradient(#3e2612 35%, #8a5a33 40%, #b88a55 70%); }
+  .kk-fusuma .kk-door.l::after { right: calc(var(--kk-u) * 14); }
+  .kk-fusuma .kk-door.r::after { left: calc(var(--kk-u) * 14); }
+  .kk-fusuma .kk-plate {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+    background: var(--kk-wood-d); color: #fff6df; border: calc(var(--kk-u) * 3) solid #c8a06a; border-radius: calc(var(--kk-u) * 10);
+    padding: calc(var(--kk-u) * 12) calc(var(--kk-u) * 26); text-align: center; font-weight: 900; white-space: nowrap;
+    font-size: calc(var(--kk-u) * 26); line-height: 1.4; transition: opacity 0.3s;
+  }
+  .kk-fusuma .kk-plate small { display: block; font-size: 0.62em; font-weight: 700; color: #ffd76a; }
+  .kk-fusuma.open .kk-door.l { transform: translateX(-102%); }
+  .kk-fusuma.open .kk-door.r { transform: translateX(102%); }
+  .kk-fusuma.open .kk-plate { opacity: 0; }
+
+  .kk-toast {
+    position: absolute; left: 50%; top: calc(var(--kk-u) * 14); transform: translateX(-50%); z-index: 41; pointer-events: none;
+    background: var(--kk-wood-d); color: #ffd76a; font-weight: 900; border-radius: 999px; white-space: nowrap;
+    padding: calc(var(--kk-u) * 6) calc(var(--kk-u) * 20); font-size: calc(var(--kk-u) * 20);
+    animation: kkToast 1.9s ease forwards;
+  }
+  @keyframes kkToast { 0% { opacity: 0; transform: translate(-50%, -10px); } 15%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+
+  /* 結果画面 */
+  .result-card.kk-compact .result-emoji { font-size: calc(var(--kk-u) * 64); margin-bottom: calc(var(--kk-u) * 4); }
+  .result-card.kk-compact .result-score { margin: calc(var(--kk-u) * 6) 0; }
+  .result-card.kk-compact .result-msg { margin-bottom: calc(var(--kk-u) * 10); }
+  .kk-res { margin: 0 auto calc(var(--kk-u) * 14); padding: calc(var(--kk-u) * 10) calc(var(--kk-u) * 18);
+    background: var(--kk-paper); border: calc(var(--kk-u) * 2) solid #e3d3b3; border-radius: calc(var(--kk-u) * 12);
+    font-weight: 800; color: var(--kk-wood-d); font-size: calc(var(--kk-u) * 18); line-height: 1.5; max-width: calc(var(--kk-u) * 560); }
+  .kk-res .kk-res-stars { font-size: calc(var(--kk-u) * 30); color: #d8d2c4; letter-spacing: 0.12em; }
+  .kk-res .kk-res-stars .on { color: var(--kk-gold); }
+  .kk-res .kk-res-sub { font-size: 0.85em; color: #8b7355; font-weight: 700; }
+  .kk-res .kk-gets { display: flex; justify-content: center; gap: calc(var(--kk-u) * 26); }
+  .kk-res .kk-get { margin-top: calc(var(--kk-u) * 6); display: flex; align-items: center; justify-content: center; gap: calc(var(--kk-u) * 8); text-align: left; animation: kkGet 0.7s ease 0.3s both; }
+  @keyframes kkGet { 0% { opacity: 0; transform: scale(0.4); } 70% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+  .kk-res .kk-get .kk-big { font-size: calc(var(--kk-u) * 38); }
+  .kk-res .kk-hanko-get { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    width: calc(var(--kk-u) * 60); height: calc(var(--kk-u) * 60); border-radius: 50%; border: calc(var(--kk-u) * 4) solid var(--kk-red);
+    color: var(--kk-red); font-size: calc(var(--kk-u) * 18); line-height: 1.1; transform: rotate(-14deg); animation: kkStamp 0.5s ease 0.6s both; }
+  @keyframes kkStamp { 0% { opacity: 0; transform: scale(2.4) rotate(-14deg); } 100% { opacity: 1; transform: scale(1) rotate(-14deg); } }
+  .kk-res .kk-escape { margin-top: calc(var(--kk-u) * 8); padding: calc(var(--kk-u) * 8); border-radius: calc(var(--kk-u) * 10);
+    background: linear-gradient(#fff3c4, #ffe08a); color: #6b4a00; font-size: 1.05em; }
+  .result-btn.kk-next { background: var(--kk-wood); border-color: var(--kk-wood); color: #fff; box-shadow: 0 4px 0 var(--kk-wood-d); }
+
+  .kk-teacher { position: absolute; left: calc(var(--kk-u) * 12); bottom: calc(var(--kk-u) * 10); z-index: 5;
+    background: transparent; border: 1px dashed #c9bfae; color: #a89c88; border-radius: 999px;
+    font-size: calc(var(--kk-u) * 13); padding: calc(var(--kk-u) * 3) calc(var(--kk-u) * 12); }
+  @media (max-width: 600px) {
+    .kk-lock .kk-gear { display: none !important; }
+    .kk-lock .kk-bar { width: 36px; }
+  }
+  /* Ⅱ: タイトル画面に看板が入るぶん、つめる */
+  #titleScreen { gap: 1.4cqh; padding-top: 2cqh; padding-bottom: 2cqh; }
+  .app-title { font-size: 44px; }
+  .app-subtitle { font-size: 18px; margin-top: 0.2em; }
+  .version-badge { position: absolute; top: 0; right: 0; margin-top: 0; font-size: 13px; }
+  .level-card { padding: 1.1cqh 0.8cqw; min-height: 0; gap: 0.3cqh; }
+  .level-card .lv-num { font-size: 30px; }
+  .level-card .lv-num small { margin-bottom: 0.15em; }
+  .kk-house { margin-top: 1.4cqh; }
 </style>
 </head>
 <body>
@@ -874,6 +1001,337 @@
 </div>
 
 <script>
+window.KK_CFG = {
+ "key": "warizan2_karakuri_v1",
+ "house": "二の やかた",
+ "escapeMsg": "🔑 きんの かぎで やかたの もんが ひらいた！",
+ "rooms": {
+  "1": {
+   "name": "はなれ",
+   "icon": "🔔",
+   "item": "すず"
+  },
+  "2": {
+   "name": "ふすまの ま",
+   "icon": "🎴",
+   "item": "えあわせ ふだ"
+  },
+  "3": {
+   "name": "からくり ろうか",
+   "icon": "🔭",
+   "item": "ぼうえんきょう"
+  },
+  "4": {
+   "name": "にかいの ま",
+   "icon": "🧩",
+   "item": "からくり パズル"
+  },
+  "5": {
+   "name": "しかけ ぐら",
+   "icon": "🎲",
+   "item": "さいころ"
+  },
+  "6": {
+   "name": "からっぽの ま",
+   "icon": "🔮",
+   "item": "すいしょう だま"
+  },
+  "7": {
+   "name": "てんしゅ",
+   "icon": "🕰️",
+   "item": "からくり どけい"
+  },
+  "8": {
+   "name": "だっしゅつの もん",
+   "icon": "🔑",
+   "item": "きんの かぎ"
+  }
+ },
+ "groups": [
+  [
+   1
+  ],
+  [
+   2
+  ],
+  [
+   3
+  ],
+  [
+   4
+  ],
+  [
+   5
+  ],
+  [
+   6
+  ],
+  [
+   7
+  ],
+  [
+   8
+  ]
+ ]
+};
+</script>
+<script>
+/* ============================================================
+   からくり屋敷 (ゲーミフィケーション)
+   - 1レベル = 1つの へや、1問 = 1つの からくりの とびら
+   - てじゅんを 1つ正しく すすめるごとに からくり錠が すすみ、1問とけると とびらが ひらく
+   - 5問中 3問以上 せいかいで へやを だっしゅつ(★)。はじめての だっしゅつで からくり道具を 1つ もらえる
+   - ノーミス(まちがい・スキップ・ヒントなし)で 5問とも とけると「名人の はんこ」
+   - すべての へや(KK_CFG.groups)を だっしゅつすると やかたから だっしゅつ
+   設定は KK_CFG(アプリごと)。保存は localStorage の KK_CFG.key だけ。
+   ============================================================ */
+const KK = (() => {
+  const CFG = window.KK_CFG;
+  let data = load();
+  let run = null;   // いまの へやの記録 { level, perfect }
+
+  function load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(CFG.key) || '{}');
+      if (!d.rooms) d.rooms = {};
+      return d;
+    } catch (e) { return { rooms: {} }; }
+  }
+  function save() { try { localStorage.setItem(CFG.key, JSON.stringify(data)); } catch (e) {} }
+  function room(lv) { return data.rooms[lv] || {}; }
+  function starsFor(correct, total) {
+    const miss = total - correct;
+    return miss <= 0 ? 3 : miss === 1 ? 2 : miss === 2 ? 1 : 0;
+  }
+  function starHtml(n) {
+    let s = '';
+    for (let i = 0; i < 3; i++) s += `<span class="${i < n ? 'on' : ''}">★</span>`;
+    return s;
+  }
+  function groupCleared(g) { return g.some(lv => (room(lv).st || 0) > 0); }
+  function groupHanko(g) { return g.some(lv => room(lv).hk); }
+  function clearedCount() { return CFG.groups.filter(groupCleared).length; }
+  function rank() {
+    const n = clearedCount(), all = CFG.groups.length;
+    if (n === all && CFG.groups.every(groupHanko)) return '👑 からくり めいじん';
+    if (n === all) return '🏯 だっしゅつ たつじん';
+    if (n >= Math.ceil(all * 0.6)) return '⚙️ からくり はかせ';
+    if (n >= 2) return '🧭 たんけんか';
+    return '🔰 みならい たんけんか';
+  }
+
+  /* ---------- タイトル画面 ---------- */
+  function decorateTitle() {
+    const grid = document.getElementById('levelGrid');
+    if (!grid) return;
+    // やかたの看板
+    let bar = document.getElementById('kkHouse');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'kkHouse'; bar.className = 'kk-house';
+      const header = document.querySelector('#titleScreen .title-header');
+      header.appendChild(bar);
+    }
+    const n = clearedCount(), all = CFG.groups.length;
+    const bag = Object.keys(CFG.rooms).map(lv => {
+      const r = CFG.rooms[lv];
+      return `<span class="${room(lv).it ? '' : 'kk-none'}" title="${r.item}">${room(lv).it ? r.icon : '？'}</span>`;
+    }).join('');
+    bar.classList.toggle('kk-escaped', n === all);
+    bar.innerHTML = `<span class="kk-hname">🏯 からくり屋敷 ${CFG.house}</span>
+      <span class="kk-prog">${n === all ? 'だっしゅつ せいこう！' : `だっしゅつ <b>${n}</b> / ${all} へや`}</span>
+      <span class="kk-rank">${rank()}</span>
+      <span class="kk-bag">🎒 ${bag}</span>`;
+
+    // へや(レベルカード)
+    grid.querySelectorAll('.level-card').forEach(card => {
+      const lv = card.dataset.level;
+      const cfg = CFG.rooms[lv];
+      if (!cfg) return;
+      const r = room(lv);
+      card.querySelectorAll('.kk-stars, .kk-hanko, .kk-hidden-tag').forEach(e => e.remove());
+      const t = card.querySelector('.lv-title');
+      if (t) {
+        t.classList.add('kk-room');
+        t.innerHTML = `<span class="kk-ic ${r.it ? '' : 'kk-none'}">${cfg.icon}</span>${cfg.name}`;
+      }
+      const st = document.createElement('div');
+      st.className = 'kk-stars'; st.innerHTML = starHtml(r.st || 0);
+      card.appendChild(st);
+      if (r.hk) {
+        const h = document.createElement('div');
+        h.className = 'kk-hanko'; h.innerHTML = '名人';
+        card.appendChild(h);
+      }
+      if (cfg.hidden) {
+        const h = document.createElement('div');
+        h.className = 'kk-hidden-tag'; h.textContent = 'かくしべや';
+        card.appendChild(h);
+      }
+      card.classList.toggle('kk-cleared', (r.st || 0) > 0);
+    });
+
+    // 先生用(記録を消す)
+    if (!document.getElementById('kkTeacher')) {
+      const b = document.createElement('button');
+      b.id = 'kkTeacher'; b.className = 'kk-teacher'; b.textContent = '先生用：きろくを けす';
+      b.onclick = () => {
+        if (!confirm('からくり屋敷の きろく(★・道具・はんこ)を すべて けしますか？')) return;
+        if (!confirm('ほんとうに けしますか？ もとには もどせません。')) return;
+        data = { rooms: {} }; save(); decorateTitle();
+      };
+      document.getElementById('titleScreen').appendChild(b);
+    }
+  }
+
+  /* ---------- 出題中 ---------- */
+  function ensureLock() {
+    let el = document.getElementById('kkLock');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'kkLock'; el.className = 'pill kk-lock';
+      el.innerHTML = '<span class="kk-gear">⚙️</span><span class="kk-bar"><i></i></span><span class="kk-lock-ic">🔒</span>';
+      document.querySelector('#mainScreen .top-bar .left').appendChild(el);
+    }
+    return el;
+  }
+  let gearDeg = 0;
+  function setLock(done, total, mode) {
+    const el = ensureLock();
+    el.classList.toggle('kk-open', mode === 'open');
+    el.classList.toggle('kk-fail', mode === 'fail');
+    el.querySelector('.kk-bar i').style.width = (total ? Math.min(100, done / total * 100) : 0) + '%';
+    el.querySelector('.kk-lock-ic').textContent = mode === 'open' ? '🔓' : '🔒';
+  }
+
+  function startRoom(level) { run = { level: String(level), perfect: true }; }
+
+  function onLoadQuestion(qIdx, total) {
+    const c = (typeof state !== 'undefined') ? state.current : null;
+    const steps = c && c.plan ? c.plan.steps.length : 0;
+    setLock(0, steps, '');
+    document.querySelectorAll('#calcPanel .kk-toast').forEach(e => e.remove());
+    const cfg = run && CFG.rooms[run.level];
+    if (!cfg) return;
+    const label = qIdx === 0
+      ? `🚪 ${cfg.name}<small>からくりの とびら ${total}つを ひらこう</small>`
+      : `とびら ${qIdx + 1} / ${total}`;
+    fusuma(label, qIdx === 0 ? 900 : 380);
+  }
+  function fusuma(label, wait) {
+    const panel = document.getElementById('calcPanel');
+    if (!panel) return;
+    panel.querySelectorAll('.kk-fusuma').forEach(e => e.remove());
+    const f = document.createElement('div');
+    f.className = 'kk-fusuma';
+    f.innerHTML = `<div class="kk-door l"></div><div class="kk-door r"></div><div class="kk-plate">${label}</div>`;
+    panel.appendChild(f);
+    setTimeout(() => f.classList.add('open'), wait);
+    setTimeout(() => f.remove(), wait + 800);
+  }
+  function toast(text) {
+    const panel = document.getElementById('calcPanel');
+    if (!panel) return;
+    panel.querySelectorAll('.kk-toast').forEach(e => e.remove());
+    const t = document.createElement('div');
+    t.className = 'kk-toast'; t.textContent = text;
+    panel.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
+  }
+  function onStep(done, total) {
+    setLock(done, total, '');
+    gearDeg += 90;
+    const g = document.querySelector('#kkLock .kk-gear');
+    if (g) g.style.transform = `rotate(${gearDeg}deg)`;
+  }
+  function onSolved(errorCount) {
+    if (run && errorCount > 0) run.perfect = false;
+    setLock(1, 1, 'open');
+    toast(errorCount <= 1 ? '🔓 カチャッ！ とびらが ひらいた！' : '🔓 とびらが ひらいた！ (まちがいが 2かい いじょう)');
+  }
+  function onFailed() {
+    if (run) run.perfect = false;
+    const c = (typeof state !== 'undefined') ? state.current : null;
+    const steps = c && c.plan ? c.plan.steps.length : 1;
+    setLock(c ? c.stepIdx : 0, steps, 'fail');
+  }
+  function onHint() { if (run) run.perfect = false; }
+
+  /* ---------- 結果画面 ---------- */
+  function onResults(correct, total) {
+    const card = document.querySelector('#resultScreen .result-card');
+    if (!card || !run) return;
+    card.classList.add('kk-compact');
+    card.querySelectorAll('.kk-res').forEach(e => e.remove());
+    document.querySelectorAll('.kk-next').forEach(e => e.remove());
+    const lv = run.level, cfg = CFG.rooms[lv];
+    if (!cfg) return;
+    const before = clearedCount();
+    const r = data.rooms[lv] = Object.assign({}, room(lv));
+    const st = starsFor(correct, total);
+    r.n = (r.n || 0) + 1;
+    const firstItem = st > 0 && !r.it;
+    const firstHanko = st === 3 && run.perfect && !r.hk;
+    r.st = Math.max(r.st || 0, st);
+    if (st > 0) r.it = true;
+    if (st === 3 && run.perfect) r.hk = true;
+    const escapedNow = before < CFG.groups.length && clearedCount() === CFG.groups.length;
+    if (escapedNow) data.escaped = new Date().toISOString().slice(0, 10);
+    save();
+
+    const box = document.createElement('div');
+    box.className = 'kk-res';
+    let html = `<div>🚪 ${cfg.name}</div><div class="kk-res-stars">${starHtml(st)}</div>`;
+    if (st > 0) {
+      html += `<div>とびらを ぬけて、へやから だっしゅつ！</div>`;
+    } else {
+      const need = Math.max(1, total - 2 - correct);
+      html += `<div>あと ${need}もん せいかいで、へやから でられるよ</div>
+        <div class="kk-res-sub">${total}もん中 ${total - 2}もん せいかいで だっしゅつ</div>`;
+    }
+    if (firstItem || firstHanko) {
+      html += '<div class="kk-gets">';
+      if (firstItem) html += `<div class="kk-get"><span class="kk-big">${cfg.icon}</span><span>${cfg.item}を<br>てにいれた！</span></div>`;
+      if (firstHanko) html += `<div class="kk-get"><span class="kk-hanko-get">名人</span><span class="kk-res-sub">ノーミスで<br>名人の はんこ！</span></div>`;
+      html += '</div>';
+    }
+    if (firstHanko) { /* 上で表示ずみ */ }
+    else if (st === 3 && !run.perfect && !r.hk) html += `<div class="kk-res-sub">まちがい・ヒント なしで とくと「名人の はんこ」が もらえるよ</div>`;
+    if (escapedNow) html += `<div class="kk-escape">🎊 からくり屋敷 ${CFG.house}から だっしゅつ せいこう！<br>${CFG.escapeMsg || ''}</div>`;
+    box.innerHTML = html;
+    const btns = card.querySelector('.result-buttons');
+    card.insertBefore(box, btns);
+
+    // つぎの へやへ
+    const next = nextLevel(lv);
+    if (st > 0 && next) {
+      const b = document.createElement('button');
+      b.className = 'result-btn kk-next';
+      b.textContent = `つぎの へや (${CFG.rooms[next].name}) へ →`;
+      b.onclick = () => goRoom(next);
+      btns.appendChild(b);
+    }
+  }
+  function nextLevel(lv) {
+    const gi = CFG.groups.findIndex(g => g.includes(Number(lv)));
+    for (let i = gi + 1; i < CFG.groups.length; i++) return String(CFG.groups[i][0]);
+    return null;
+  }
+  function goRoom(lv) {
+    showScreen('titleScreen');
+    decorateTitle();
+    const card = document.querySelector(`.level-card[data-level="${lv}"]`);
+    if (!card) return;
+    card.click();
+    // チャレンジの解法えらび(Ⅰ)など、モーダルが出たときは そこで えらんでもらう
+    if (CFG.needsChoice && CFG.needsChoice(lv)) return;
+    document.getElementById('startBtn').click();
+  }
+
+  return { decorateTitle, startRoom, onLoadQuestion, onStep, onSolved, onFailed, onHint, onResults };
+})();
+</script>
+<script>
 /* ---------- 10.1インチ基準ステージのスケーリング ---------- */
 const DESIGN_W = 1280, DESIGN_H = 800;
 function fitStage() {
@@ -898,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '2.16.0';
+const APP_VERSION = '3.0.0';  // v3.0.0: からくり屋敷(ゲーミフィケーション)
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
@@ -2769,10 +3227,12 @@ function advanceStep() {
     c.completed = true;
     if (c.errorCount <= 1) state.correctCount++;
     document.getElementById('correctDisplay').textContent = state.correctCount;
+    KK.onSolved(c.errorCount);
     clearDimUnused();
     showRemainderTag();
     showCorrectMark();
   } else {
+    KK.onStep(c.stepIdx, c.plan.steps.length);
     updateDimUnused();
     updateStepHint();
   }
@@ -2785,6 +3245,7 @@ function failCurrentQuestion() {
   if (!c || c.completed) return;
   c.completed = true;
   c.stepConfirmed = false;
+  KK.onFailed();
   enableNumpad(false);
   clearSpotlight();
   clearMaskables();
@@ -2949,6 +3410,7 @@ function loadQuestion() {
   enableNumpad(false);
   clearSpotlight();
   clearAllMasks();
+  KK.onLoadQuestion(state.qIdx, state.questions.length);
 }
 
 /* ---------- STEP BUTTON SHUFFLE ---------- */
@@ -2964,6 +3426,7 @@ function shuffleStepButtons(shouldShuffle) {
 
 /* ---------- BUILD QUESTION SET ---------- */
 function buildQuestionSet() {
+  KK.startRoom(state.level);
   const lvl = LEVELS[state.level];
   if (lvl.isChallenge) {
     buildChallengeSet(lvl);
@@ -3021,6 +3484,7 @@ function buildChallengeSet(lvl) {
 
 /* ---------- SCREENS ---------- */
 function showScreen(id) {
+  if (id === 'titleScreen') setTimeout(() => KK.decorateTitle(), 0);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
@@ -3080,6 +3544,7 @@ function showResults() {
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultMsg').textContent = msg;
   if (pct >= 0.8) launchConfetti();
+  KK.onResults(correct, total);
 }
 function launchConfetti() {
   const container = document.getElementById('confetti');
@@ -3112,6 +3577,7 @@ function setupMainScreen() {
   if (borrowBtn) borrowBtn.onclick = handleBorrowClick;  // v2.8.0
   document.getElementById('skipBtn').onclick = () => {
     if (!state.current || state.current.completed) return;
+    KK.onFailed();
     resetMarkAndButtons();
     state.qIdx++;
     if (state.qIdx >= state.questions.length) showResults();
@@ -3163,6 +3629,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const tv = document.getElementById('titleVersion'); if (tv) tv.textContent = APP_VERSION;
   const mv = document.getElementById('mainVersion'); if (mv) mv.textContent = APP_VERSION;
   setupTitleScreen();
+  KK.decorateTitle();
   setupMainScreen();
   setupResultScreen();
 });
