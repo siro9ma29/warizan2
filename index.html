@@ -838,6 +838,153 @@
     .kk-lock .kk-gear { display: none !important; }
     .kk-lock .kk-bar { width: 36px; }
   }
+  /* ============ からくり屋敷のメニュー画面 ============ */
+  #titleScreen {
+    --kk-mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", "MS PMincho", serif;
+    background-color: #efe2c4;
+    background-image:
+      /* 左右の柱 */
+      linear-gradient(90deg, #6b4325 0, #8a5a33 calc(var(--kk-u) * 14), #5e3b1f calc(var(--kk-u) * 18), transparent calc(var(--kk-u) * 18),
+                             transparent calc(100% - var(--kk-u) * 18), #5e3b1f calc(100% - var(--kk-u) * 18), #8a5a33 calc(100% - var(--kk-u) * 14), #6b4325 100%),
+      /* 床(板の間) */
+      linear-gradient(to top, #7a5030 0, #9a6a40 calc(var(--kk-u) * 22), #5e3b1f calc(var(--kk-u) * 24), transparent calc(var(--kk-u) * 24)),
+      /* 土かべの むら */
+      radial-gradient(circle at 18% 30%, rgba(255,255,255,0.35), transparent 35%),
+      radial-gradient(circle at 82% 70%, rgba(160,110,50,0.10), transparent 40%);
+    padding-top: calc(var(--kk-u) * 62) !important;
+  }
+  /* やね(かわら)と のき */
+  #titleScreen::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--kk-u) * 40); z-index: 0;
+    background:
+      linear-gradient(to bottom, transparent calc(100% - var(--kk-u) * 9), #5e3b1f calc(100% - var(--kk-u) * 9), #8a5a33 calc(100% - var(--kk-u) * 3), #3e2612 100%),
+      repeating-linear-gradient(90deg, #4a5462 0, #5c6676 calc(var(--kk-u) * 10), #3a424e calc(var(--kk-u) * 22), #2a3039 calc(var(--kk-u) * 24)),
+      #3a424e;
+    box-shadow: 0 calc(var(--kk-u) * 4) calc(var(--kk-u) * 10) rgba(60,35,15,0.35);
+  }
+  #titleScreen > * { position: relative; z-index: 1; }
+  #titleScreen .kk-gearDeco { position: absolute; z-index: 2; top: calc(var(--kk-u) * 6); font-size: calc(var(--kk-u) * 26); line-height: 1;
+    animation: kkSpin 9s linear infinite; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5)); pointer-events: none; }
+  #titleScreen .kk-gearDeco.l { left: calc(var(--kk-u) * 28); }
+  #titleScreen .kk-gearDeco.r { right: calc(var(--kk-u) * 28); animation-direction: reverse; }
+  @keyframes kkSpin { to { transform: rotate(360deg); } }
+
+  /* 看板(へんがく) */
+  #titleScreen .title-header::before, #titleScreen .title-header::after { content: none; }
+  #titleScreen .app-title {
+    display: inline-block; position: relative;
+    font-family: var(--kk-mincho); font-weight: 900; color: #fff3d6; letter-spacing: 0.12em;
+    background: linear-gradient(#5a381e, #3e2612);
+    border: calc(var(--kk-u) * 4) solid #c8a06a; border-radius: calc(var(--kk-u) * 6);
+    outline: calc(var(--kk-u) * 2) solid #3e2612;
+    padding: calc(var(--kk-u) * 4) calc(var(--kk-u) * 30) calc(var(--kk-u) * 6);
+    box-shadow: 0 calc(var(--kk-u) * 6) calc(var(--kk-u) * 14) rgba(62,38,18,0.45);
+    text-shadow: 0 calc(var(--kk-u) * 2) 0 rgba(0,0,0,0.4);
+  }
+  #titleScreen .app-title .accent { color: #ffc14d; }
+  /* 左右の ちょうちん */
+  #titleScreen .app-title::before, #titleScreen .app-title::after {
+    content: '🏮'; position: absolute; top: 18%; font-size: 0.7em; letter-spacing: 0; text-shadow: none;
+    animation: kkSway 3.2s ease-in-out infinite; transform-origin: 50% -40%;
+  }
+  #titleScreen .app-title::before { left: -1.25em; }
+  #titleScreen .app-title::after { right: -1.25em; animation-delay: -1.6s; }
+  @keyframes kkSway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+  #titleScreen .app-subtitle { color: #6b4a2b; font-weight: 700; }
+  #titleScreen.kk-escaped .app-title { border-color: #ffd76a; box-shadow: 0 0 calc(var(--kk-u) * 22) rgba(255,200,80,0.8), 0 calc(var(--kk-u) * 6) calc(var(--kk-u) * 14) rgba(62,38,18,0.45); }
+
+  /* やかたの ふだ(看板の下) */
+  #titleScreen .kk-house { background: #fbf6ea; color: #5e3b1f; border: calc(var(--kk-u) * 2) solid #8a5a33;
+    box-shadow: 0 calc(var(--kk-u) * 3) 0 #8a5a33; }
+  #titleScreen .kk-house::before { content: none; }
+  #titleScreen .kk-house .kk-prog { background: #efe2c4; }
+  #titleScreen .kk-house .kk-prog b, #titleScreen .kk-house .kk-rank { color: #b5452f; }
+  #titleScreen .kk-house.kk-escaped { background: linear-gradient(#fff3c4, #ffe08a); border-color: #b8860b; }
+
+  #titleScreen .section-label { color: #5e3b1f; font-family: var(--kk-mincho); font-weight: 900; }
+  #titleScreen .section-label .deco { color: #b5452f; }
+
+  /* 見取り図(へやの ならび)：はりと柱の わく */
+  #titleScreen .level-grid {
+    background: #6b4325; padding: calc(var(--kk-u) * 8); border-radius: calc(var(--kk-u) * 4);
+    box-shadow: inset 0 0 0 calc(var(--kk-u) * 2) #3e2612, 0 calc(var(--kk-u) * 6) calc(var(--kk-u) * 12) rgba(62,38,18,0.35);
+    box-sizing: border-box;
+  }
+  /* へや = ふすま */
+  #titleScreen .level-card {
+    border-radius: calc(var(--kk-u) * 2); border: calc(var(--kk-u) * 4) solid #8a5a33;
+    background-color: #f1ebdc;
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,0.6), transparent 45%),
+      repeating-linear-gradient(135deg, rgba(138,90,51,0.05) 0 calc(var(--kk-u) * 6), transparent calc(var(--kk-u) * 6) calc(var(--kk-u) * 12));
+    box-shadow: inset 0 0 0 calc(var(--kk-u) * 1.5) #5e3b1f, 0 calc(var(--kk-u) * 3) 0 #3e2612;
+    transition: transform 0.15s, box-shadow 0.2s, background-color 0.2s;
+  }
+  /* ひきて */
+  #titleScreen .level-card::after {
+    content: ''; position: absolute; right: calc(var(--kk-u) * 2); top: 50%;
+    width: calc(var(--kk-u) * 9); height: calc(var(--kk-u) * 9); margin-top: calc(var(--kk-u) * -4.5); border-radius: 50%;
+    background: radial-gradient(#3e2612 35%, #8a5a33 42%, #c8a06a 75%);
+  }
+  #titleScreen .level-card .lv-num { color: #b5452f; font-family: var(--kk-mincho); }
+  #titleScreen .level-card .lv-num small { color: #8b6a48; font-family: var(--font-display, inherit); }
+  #titleScreen .level-card .lv-desc { color: #6b5540; }
+  #titleScreen .level-card .kk-room { font-family: var(--kk-mincho); font-weight: 900; }
+  /* だっしゅつした へや：あかりが ともる */
+  #titleScreen .level-card.kk-cleared {
+    background-color: #fff3d0;
+    box-shadow: inset 0 0 0 calc(var(--kk-u) * 1.5) #5e3b1f, inset 0 0 calc(var(--kk-u) * 22) rgba(255,180,60,0.55), 0 calc(var(--kk-u) * 3) 0 #3e2612;
+  }
+  /* えらんだ へや */
+  #titleScreen .level-card.selected {
+    border-color: #e0a020; background-color: #fff8e6; transform: translateY(calc(var(--kk-u) * -3));
+    box-shadow: inset 0 0 0 calc(var(--kk-u) * 1.5) #b8860b, 0 0 0 calc(var(--kk-u) * 3) #ffd76a, 0 calc(var(--kk-u) * 6) calc(var(--kk-u) * 14) rgba(255,190,60,0.6);
+  }
+  /* かくしべや */
+  #titleScreen .level-card.variant { background-color: #e9e2ef; }
+  #titleScreen .level-card.variant .lv-num { color: #7a5aa6; }
+  #titleScreen .level-card.variant.kk-cleared { background-color: #f6eefb; }
+  /* チャレンジ = きんの ふすま */
+  #titleScreen .level-card.challenge {
+    border-color: #8a5a33; background-color: #f2d98a;
+    background-image:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.65), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(184,134,11,0.18) 0 1px, transparent 1px calc(var(--kk-u) * 16)),
+      repeating-linear-gradient(90deg, rgba(184,134,11,0.18) 0 1px, transparent 1px calc(var(--kk-u) * 16));
+  }
+  #titleScreen .level-card.challenge .lv-num { color: #9a6a00; }
+  #titleScreen .level-card.challenge.selected { border-color: #e0a020; background-color: #ffe9a8; }
+
+  /* モード = 木の ふだ */
+  #titleScreen .mode-btn {
+    position: relative; background: linear-gradient(#e8cfa4, #d4b07a); border: calc(var(--kk-u) * 2) solid #8a5a33; border-radius: calc(var(--kk-u) * 6);
+    color: #3e2612; box-shadow: 0 calc(var(--kk-u) * 3) 0 #5e3b1f;
+  }
+  #titleScreen .mode-btn::before { content: ''; position: absolute; top: calc(var(--kk-u) * 5); left: 50%; transform: translateX(-50%);
+    width: calc(var(--kk-u) * 7); height: calc(var(--kk-u) * 7); border-radius: 50%; background: #5e3b1f; }
+  #titleScreen .mode-btn.selected { background: linear-gradient(#fff1c8, #f3d58a); border-color: #b5452f;
+    box-shadow: 0 calc(var(--kk-u) * 3) 0 #b5452f, 0 0 0 calc(var(--kk-u) * 2) rgba(181,69,47,0.25); }
+  #titleScreen .mode-btn.selected::before { background: #b5452f; }
+
+  /* はじめる = しゅぬりの とびら */
+  #titleScreen .start-btn {
+    background: linear-gradient(#d0503a, #a8352a); color: #fff6df; border: calc(var(--kk-u) * 3) solid #e0b060;
+    box-shadow: 0 calc(var(--kk-u) * 5) 0 #6e2018, 0 calc(var(--kk-u) * 10) calc(var(--kk-u) * 18) rgba(110,32,24,0.35);
+    font-family: var(--kk-mincho); text-shadow: 0 calc(var(--kk-u) * 2) 0 rgba(0,0,0,0.3);
+  }
+  #titleScreen .start-btn:active { box-shadow: 0 calc(var(--kk-u) * 2) 0 #6e2018; }
+  #titleScreen .start-btn:disabled { background: #b9a88f; border-color: #d8c8ac; color: #f3ebdc; box-shadow: 0 calc(var(--kk-u) * 5) 0 #8a7a62; text-shadow: none; }
+
+  #titleScreen .kk-teacher { position: absolute; bottom: calc(var(--kk-u) * 30); left: calc(var(--kk-u) * 26); border-color: #b29a78; color: #8b7355; background: rgba(255,255,255,0.4); }
+  #titleScreen .version-badge { z-index: 3; }
+  @media (max-width: 599px) {
+    #titleScreen { padding-top: 34px !important; padding-bottom: 30px !important; }
+    #titleScreen .app-title { letter-spacing: 0.02em; padding: 4px 12px 6px; border-width: 3px; }
+    #titleScreen .app-title::before, #titleScreen .app-title::after { display: none; }
+    #titleScreen .level-grid { padding: 4px; }
+    #titleScreen .kk-gearDeco { font-size: 18px; top: 3px; }
+    #titleScreen .kk-teacher { position: static; flex-shrink: 0; }
+  }
   /* Ⅱ: タイトル画面に看板が入るぶん、つめる */
   #titleScreen { gap: 1.4cqh; padding-top: 2cqh; padding-bottom: 2cqh; }
   .app-title { font-size: 44px; }
@@ -847,6 +994,12 @@
   .level-card .lv-num { font-size: 30px; }
   .level-card .lv-num small { margin-bottom: 0.15em; }
   .kk-house { margin-top: 1.4cqh; }
+  #titleScreen { gap: 0.9cqh; padding-top: 50px !important; padding-bottom: 34px; justify-content: flex-start; }
+  #titleScreen .app-title { font-size: 38px; }
+  .kk-house { margin-top: 0.8cqh; }
+  #titleScreen .start-btn { font-size: 25px; padding: 1.3cqh 5cqw; margin-top: 0.4cqh; }
+  #titleScreen .mode-btn { padding: 1.2cqh 2.5cqw; }
+  #titleScreen .level-card { padding: 0.8cqh 0.8cqw; }
 </style>
 </head>
 <body>
@@ -1143,6 +1296,21 @@ const KK = (() => {
       <span class="kk-rank">${rank()}</span>
       <span class="kk-bag">🎒 ${bag}</span>`;
 
+    // メニュー画面の かざり(1回だけ)
+    const ts = document.getElementById('titleScreen');
+    ts.classList.toggle('kk-escaped', n === all);
+    if (!ts.querySelector('.kk-gearDeco')) {
+      ['l', 'r'].forEach(side => {
+        const g = document.createElement('div');
+        g.className = 'kk-gearDeco ' + side; g.textContent = '⚙️';
+        ts.appendChild(g);
+      });
+      const labels = ts.querySelectorAll('.section-label');
+      if (labels[0]) labels[0].innerHTML = '<span class="deco">1.</span> へや(レベル)を えらぼう';
+      const sb = document.getElementById('startBtn');
+      if (sb) sb.textContent = 'へやに はいる →';
+    }
+
     // へや(レベルカード)
     grid.querySelectorAll('.level-card').forEach(card => {
       const lv = card.dataset.level;
@@ -1356,7 +1524,7 @@ document.addEventListener('DOMContentLoaded', fitStage);
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 /* アプリのバージョン(ここを変えると画面表示も変わる) */
-const APP_VERSION = '3.0.0';  // v3.0.0: からくり屋敷(ゲーミフィケーション)
+const APP_VERSION = '3.1.0';  // v3.0.0: からくり屋敷(ゲーミフィケーション) / v3.1.0: メニュー画面を からくり屋敷に
 
 /* 「使わないけたを薄く」を いつ 開始するか。
    true : 「たてる」(または「へらす」)ボタンを押した瞬間から薄くする  ← v2.4.0 の既定
